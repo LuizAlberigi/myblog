@@ -1,0 +1,98 @@
+---
+title: "Monitoramento de Frota de Ônibus"
+author: "Luiz Alberigi"
+date: "2025-11-19"
+categories: [monitoramento, code, python, onibus]
+image: "Entrega-Blog_Entrega_blog_2.png"
+jupyter: python3
+---
+
+Este post desenvolve um mapa com os pontos de parada de uma linha de ônibus (marcados com pins) e também apresenta a posição real de onde está ônibus no momento. A linha de ônibus utilizada é 7049-10
+
+
+```{python}
+
+import requests
+import folium
+from IPython.display import display
+
+# ==============================
+# CONFIGURAÇÃO
+# ==============================
+TOKEN = "c0b41dad848fe108b36f55a0649798f350251b9e448c364f8afca955041ad382"
+CODIGO_LINHA = 1912  # 7049-10
+
+# Paradas manuais (adicione as suas)
+PARADAS = [
+    (-23.62050, -46.76090, "Parada 1"),
+    (-23.62210, -46.75970, "Parada 2"),
+    (-23.62480, -46.75700, "Parada 3"),
+]
+
+# ==============================
+# AUTENTICAR
+# ==============================
+s = requests.Session()
+auth = s.post(
+    "http://api.olhovivo.sptrans.com.br/v2.1/Login/Autenticar",
+    params={"token": TOKEN}
+)
+
+if auth.text.strip().lower() != "true":
+    raise Exception("Falha ao autenticar. Resposta da API: " + auth.text)
+
+# ==============================
+# POSIÇÃO DOS ÔNIBUS EM TEMPO REAL 
+# ==============================
+bus_resp = s.get(
+    "http://api.olhovivo.sptrans.com.br/v2.1/Posicao/Linha",
+    params={"codigoLinha": CODIGO_LINHA}
+)
+
+dados = bus_resp.json()
+
+# Lista de ônibus: lat, lon, prefixo
+bus_positions = [
+    (v["py"], v["px"], v["p"])
+    for v in dados.get("vs", [])
+]
+
+print("Ônibus encontrados:", len(bus_positions))
+
+# ==============================
+# GERAR MAPA
+# ==============================
+# Centralizar no primeiro ônibus ou numa parada
+if bus_positions:
+    center = (bus_positions[0][0], bus_positions[0][1])
+else:
+    center = PARADAS[0][:2]
+
+m = folium.Map(location=center, zoom_start=15)
+
+# ---- PARADAS (AZUL)
+for lat, lon, nome in PARADAS:
+    folium.Marker(
+        location=(lat, lon),
+        popup=f"Parada: {nome}",
+        icon=folium.Icon(color="blue", icon="info-sign")
+    ).add_to(m)
+
+# ---- ÔNIBUS (VERMELHO)
+for lat, lon, prefixo in bus_positions:
+    folium.Marker(
+        location=(lat, lon),
+        popup=f"Ônibus {prefixo}",
+        icon=folium.Icon(color="red", icon="bus")
+    ).add_to(m)
+
+# Exibir no Quarto
+m
+
+
+
+```
+
+
+
+

@@ -1,0 +1,46 @@
+---
+title: "Gráfico da Cotação do Dólar por Período"
+author: "Luiz Alberigi"
+date: "2025-11-18"
+categories: [cotação, code, python, dólar]
+image: "pngtree-financial-growth-a-rising-graph-stacks-of-money-and-coins-illustrate-png-image_15331270.png"
+jupyter: python3
+---
+
+Este post tem como objetivo desenvolver uma rotina em *Python* que, a partir de uma string no formato "MMYYYY", consulte a API PTAX do Banco Central do Brasil e retorne um gráfico de linha mostrando a **cotação do dólar** ao longo do mês informado.
+
+```{python}
+import pandas as pd
+import plotly.express as px
+import numpy as np
+
+# -----------------------
+# Dados simulados para Junho/2023
+# -----------------------
+datas = pd.date_range("2023-06-01", "2023-06-30", freq="D")
+cotacoes = 4.90 + np.sin(np.linspace(0, 3.14, len(datas))) * 0.20  # pequena variação artificial
+
+df = pd.DataFrame({
+    "dataHoraCotacao": datas,
+    "cotacaoVenda": cotacoes
+})
+
+# -----------------------
+# Gráfico
+# -----------------------
+fig = px.line(
+    df,
+    x="dataHoraCotacao",
+    y="cotacaoVenda",
+    title="Cotação do Dólar – Junho/2023 (Simulado)",
+    markers=True
+)
+
+fig.update_layout(
+    xaxis_title="Data",
+    yaxis_title="Cotação de Venda (R$)"
+)
+
+fig.show()
+
+```

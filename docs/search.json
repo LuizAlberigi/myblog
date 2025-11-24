@@ -1,0 +1,37 @@
+[
+  {
+    "objectID": "posts/Cotação do Dólar/index.html",
+    "href": "posts/Cotação do Dólar/index.html",
+    "title": "Gráfico da Cotação do Dólar por Período",
+    "section": "",
+    "text": "Este post tem como objetivo desenvolver uma rotina em Python que, a partir de uma string no formato “MMYYYY”, consulte a API PTAX do Banco Central do Brasil e retorne um gráfico de linha mostrando a cotação do dólar ao longo do mês informado.\n\nimport pandas as pd\nimport plotly.express as px\nimport numpy as np\n\n# -----------------------\n# Dados simulados para Junho/2023\n# -----------------------\ndatas = pd.date_range(\"2023-06-01\", \"2023-06-30\", freq=\"D\")\ncotacoes = 4.90 + np.sin(np.linspace(0, 3.14, len(datas))) * 0.20  # pequena variação artificial\n\ndf = pd.DataFrame({\n    \"dataHoraCotacao\": datas,\n    \"cotacaoVenda\": cotacoes\n})\n\n# -----------------------\n# Gráfico\n# -----------------------\nfig = px.line(\n    df,\n    x=\"dataHoraCotacao\",\n    y=\"cotacaoVenda\",\n    title=\"Cotação do Dólar – Junho/2023 (Simulado)\",\n    markers=True\n)\n\nfig.update_layout(\n    xaxis_title=\"Data\",\n    yaxis_title=\"Cotação de Venda (R$)\"\n)\n\nfig.show()"
+  },
+  {
+    "objectID": "posts/Regressão-linear/index.html",
+    "href": "posts/Regressão-linear/index.html",
+    "title": "Regressão Linear",
+    "section": "",
+    "text": "Neste post vamos realizar uma regressão linear simples utilizando Python, NumPy e Plotly.\nCarregando os dados\n\nimport numpy as np\n\n# Carregar arquivos do Jupyter (PRECISA estar na mesma pasta do .ipynb)\nX = np.loadtxt(\"X.txt\")\ny = np.loadtxt(\"y.txt\")\n\n# Garantir formato coluna\nX = X.reshape(-1, 1)\n\nprint(\"Primeiros valores de X:\", X[:5].flatten())\nprint(\"Primeiros valores de y:\", y[:5])\n\nPrimeiros valores de X: [1.0001196  1.01898722 1.02368946 1.02374228 1.02376542]\nPrimeiros valores de y: [1143.9765853  2419.25611262 1447.13176096  334.15992826 1214.72297412]\n\n\nMontar a matriz do modelo\n\n# Matriz de design\nX_design = np.hstack([np.ones((X.shape[0], 1)), X])\n\nX_design[:5]\n\narray([[1.        , 1.0001196 ],\n       [1.        , 1.01898722],\n       [1.        , 1.02368946],\n       [1.        , 1.02374228],\n       [1.        , 1.02376542]])\n\n\nAjustando o modelo via Equação Normal\n\n# Equação normal\nbeta = np.linalg.inv(X_design.T @ X_design) @ (X_design.T @ y)\n\nb0, b1 = beta\n\nprint(\"Intercepto (b0):\", b0)\nprint(\"Inclinação (b1):\", b1)\n\nIntercepto (b0): 373.93446839132355\nInclinação (b1): 991.6278332981952\n\n\nGerar as previsões (y_pred)\n\n# Previsões\ny_pred = b0 + b1 * X\n\nGráfico interativo (Plotly)\n\nimport pandas as pd\nimport plotly.express as px\n\n# Construir DataFrame\ndf = pd.DataFrame({\n    \"X\": X.flatten(),\n    \"y_real\": y,\n    \"y_pred\": y_pred.flatten()\n})\n\n# Gráfico\nfig = px.scatter(df, x=\"X\", y=\"y_real\", title=\"Regressão Linear — Dados Reais\")\nfig.add_traces(px.line(df, x=\"X\", y=\"y_pred\").data)\nfig.show()\n\n                            \n                                            \n\n\nMétricas do modelo\n\nfrom sklearn.metrics import r2_score, mean_squared_error\n\nr2 = r2_score(y, y_pred)\nmse = mean_squared_error(y, y_pred)\n\nprint(\"R²:\", r2)\nprint(\"MSE:\", mse)\n\nR²: 0.9426947534388819\nMSE: 1008068.4828016725"
+  },
+  {
+    "objectID": "about.html",
+    "href": "about.html",
+    "title": "About",
+    "section": "",
+    "text": "About this blog"
+  },
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "myblog",
+    "section": "",
+    "text": "Regressão Linear\n\n\n\ncalcular\n\ncode\n\npython\n\nregreção\n\n\n\n\n\n\n\n\n\nNov 20, 2025\n\n\nLuiz Alberigi\n\n\n\n\n\n\n\n\n\n\n\n\nMonitoramento de Frota de Ônibus\n\n\n\nmonitoramento\n\ncode\n\npython\n\nonibus\n\n\n\n\n\n\n\n\n\nNov 19, 2025\n\n\nLuiz Alberigi\n\n\n\n\n\n\n\n\n\n\n\n\nGráfico da Cotação do Dólar por Período\n\n\n\ncotação\n\ncode\n\npython\n\ndólar\n\n\n\n\n\n\n\n\n\nNov 18, 2025\n\n\nLuiz Alberigi\n\n\n\n\n\nNo matching items"
+  },
+  {
+    "objectID": "posts/Monitoramento de Frota de Ônibus/index.html",
+    "href": "posts/Monitoramento de Frota de Ônibus/index.html",
+    "title": "Monitoramento de Frota de Ônibus",
+    "section": "",
+    "text": "Este post desenvolve um mapa com os pontos de parada de uma linha de ônibus (marcados com pins) e também apresenta a posição real de onde está ônibus no momento. A linha de ônibus utilizada é 7049-10\n\nimport requests\nimport folium\nfrom IPython.display import display\n\n# ==============================\n# CONFIGURAÇÃO\n# ==============================\nTOKEN = \"c0b41dad848fe108b36f55a0649798f350251b9e448c364f8afca955041ad382\"\nCODIGO_LINHA = 1912  # 7049-10\n\n# Paradas manuais (adicione as suas)\nPARADAS = [\n    (-23.62050, -46.76090, \"Parada 1\"),\n    (-23.62210, -46.75970, \"Parada 2\"),\n    (-23.62480, -46.75700, \"Parada 3\"),\n]\n\n# ==============================\n# AUTENTICAR\n# ==============================\ns = requests.Session()\nauth = s.post(\n    \"http://api.olhovivo.sptrans.com.br/v2.1/Login/Autenticar\",\n    params={\"token\": TOKEN}\n)\n\nif auth.text.strip().lower() != \"true\":\n    raise Exception(\"Falha ao autenticar. Resposta da API: \" + auth.text)\n\n# ==============================\n# POSIÇÃO DOS ÔNIBUS EM TEMPO REAL (ENDPOINT CORRETO)\n# ==============================\nbus_resp = s.get(\n    \"http://api.olhovivo.sptrans.com.br/v2.1/Posicao/Linha\",\n    params={\"codigoLinha\": CODIGO_LINHA}\n)\n\ndados = bus_resp.json()\n\n# Lista de ônibus: lat, lon, prefixo\nbus_positions = [\n    (v[\"py\"], v[\"px\"], v[\"p\"])\n    for v in dados.get(\"vs\", [])\n]\n\nprint(\"Ônibus encontrados:\", len(bus_positions))\n\n# ==============================\n# GERAR MAPA\n# ==============================\n# Centralizar no primeiro ônibus ou numa parada\nif bus_positions:\n    center = (bus_positions[0][0], bus_positions[0][1])\nelse:\n    center = PARADAS[0][:2]\n\nm = folium.Map(location=center, zoom_start=15)\n\n# ---- PARADAS (AZUL)\nfor lat, lon, nome in PARADAS:\n    folium.Marker(\n        location=(lat, lon),\n        popup=f\"Parada: {nome}\",\n        icon=folium.Icon(color=\"blue\", icon=\"info-sign\")\n    ).add_to(m)\n\n# ---- ÔNIBUS (VERMELHO)\nfor lat, lon, prefixo in bus_positions:\n    folium.Marker(\n        location=(lat, lon),\n        popup=f\"Ônibus {prefixo}\",\n        icon=folium.Icon(color=\"red\", icon=\"bus\")\n    ).add_to(m)\n\n# Exibir no Quarto\nm\n\nÔnibus encontrados: 5\n\n\nMake this Notebook Trusted to load map: File -&gt; Trust Notebook"
+  }
+]

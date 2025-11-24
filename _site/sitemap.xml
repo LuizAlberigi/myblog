@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://your-website-url.example.com/index.html</loc>
+    <lastmod>2025-11-23T18:32:14.262Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-website-url.example.com/posts/post-with-code/index.html</loc>
+    <lastmod>2025-11-23T21:03:45.542Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-website-url.example.com/about.html</loc>
+    <lastmod>2025-11-23T18:30:05.370Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-website-url.example.com/posts/welcome/index.html</loc>
+    <lastmod>2025-11-23T22:46:29.455Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-website-url.example.com/posts/Monitoramento de Frota de Ônibus/index.html</loc>
+    <lastmod>2025-11-23T23:54:43.362Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-website-url.example.com/posts/Cotação do Dólar/index.html</loc>
+    <lastmod>2025-11-23T23:54:26.721Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-website-url.example.com/posts/Regressão Linear/index.html</loc>
+    <lastmod>2025-11-23T23:40:15.716Z</lastmod>
+  </url>
+  <url>
+    <loc>https://your-website-url.example.com/posts/Regressão-linear/index.html</loc>
+    <lastmod>2025-11-23T23:55:00.900Z</lastmod>
+  </url>
+</urlset>

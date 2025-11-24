@@ -1,0 +1,1190 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss  xmlns:atom="http://www.w3.org/2005/Atom" 
+      xmlns:media="http://search.yahoo.com/mrss/" 
+      xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+      xmlns:dc="http://purl.org/dc/elements/1.1/" 
+      version="2.0">
+<channel>
+<title>myblog</title>
+<link>https://your-website-url.example.com/</link>
+<atom:link href="https://your-website-url.example.com/index.xml" rel="self" type="application/rss+xml"/>
+<description>A blog built with Quarto</description>
+<generator>quarto-1.8.26</generator>
+<lastBuildDate>Thu, 20 Nov 2025 00:00:00 GMT</lastBuildDate>
+<item>
+  <title>Regressão Linear</title>
+  <dc:creator>Luiz Alberigi</dc:creator>
+  <link>https://your-website-url.example.com/posts/Regressão-linear/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Neste post vamos realizar uma <strong>regressão linear simples</strong> utilizando Python, NumPy e Plotly.</p>
+<p>Carregando os dados</p>
+<div id="ebfeacd6" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-2"></span>
+<span id="cb1-3"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Carregar arquivos do Jupyter (PRECISA estar na mesma pasta do .ipynb)</span></span>
+<span id="cb1-4">X <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.loadtxt(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"X.txt"</span>)</span>
+<span id="cb1-5">y <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.loadtxt(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y.txt"</span>)</span>
+<span id="cb1-6"></span>
+<span id="cb1-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Garantir formato coluna</span></span>
+<span id="cb1-8">X <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> X.reshape(<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>, <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)</span>
+<span id="cb1-9"></span>
+<span id="cb1-10"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Primeiros valores de X:"</span>, X[:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>].flatten())</span>
+<span id="cb1-11"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Primeiros valores de y:"</span>, y[:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>])</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Primeiros valores de X: [1.0001196  1.01898722 1.02368946 1.02374228 1.02376542]
+Primeiros valores de y: [1143.9765853  2419.25611262 1447.13176096  334.15992826 1214.72297412]</code></pre>
+</div>
+</div>
+<p>Montar a matriz do modelo</p>
+<div id="3cee98c9" class="cell" data-execution_count="2">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Matriz de design</span></span>
+<span id="cb3-2">X_design <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.hstack([np.ones((X.shape[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>)), X])</span>
+<span id="cb3-3"></span>
+<span id="cb3-4">X_design[:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">5</span>]</span></code></pre></div></div>
+<div class="cell-output cell-output-display" data-execution_count="2">
+<pre><code>array([[1.        , 1.0001196 ],
+       [1.        , 1.01898722],
+       [1.        , 1.02368946],
+       [1.        , 1.02374228],
+       [1.        , 1.02376542]])</code></pre>
+</div>
+</div>
+<p>Ajustando o modelo via Equação Normal</p>
+<div id="370a8fe4" class="cell" data-execution_count="3">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Equação normal</span></span>
+<span id="cb5-2">beta <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> np.linalg.inv(X_design.T <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> X_design) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> (X_design.T <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">@</span> y)</span>
+<span id="cb5-3"></span>
+<span id="cb5-4">b0, b1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> beta</span>
+<span id="cb5-5"></span>
+<span id="cb5-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Intercepto (b0):"</span>, b0)</span>
+<span id="cb5-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Inclinação (b1):"</span>, b1)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Intercepto (b0): 373.93446839132355
+Inclinação (b1): 991.6278332981952</code></pre>
+</div>
+</div>
+<p>Gerar as previsões (y_pred)</p>
+<div id="613c32da" class="cell" data-execution_count="4">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Previsões</span></span>
+<span id="cb7-2">y_pred <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> b0 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> b1 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> X</span></code></pre></div></div>
+</div>
+<p>Gráfico interativo (Plotly)</p>
+<div id="75e87c1c" class="cell" data-execution_count="5">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pd</span>
+<span id="cb8-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> plotly.express <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> px</span>
+<span id="cb8-3"></span>
+<span id="cb8-4"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Construir DataFrame</span></span>
+<span id="cb8-5">df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.DataFrame({</span>
+<span id="cb8-6">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"X"</span>: X.flatten(),</span>
+<span id="cb8-7">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y_real"</span>: y,</span>
+<span id="cb8-8">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y_pred"</span>: y_pred.flatten()</span>
+<span id="cb8-9">})</span>
+<span id="cb8-10"></span>
+<span id="cb8-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Gráfico</span></span>
+<span id="cb8-12">fig <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> px.scatter(df, x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"X"</span>, y<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y_real"</span>, title<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Regressão Linear — Dados Reais"</span>)</span>
+<span id="cb8-13">fig.add_traces(px.line(df, x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"X"</span>, y<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"y_pred"</span>).data)</span>
+<span id="cb8-14">fig.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script type="text/javascript">if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.2.0.min.js" integrity="sha256-iZ2u/oU2wf/vDbl/ChcX93WgbBRSBvUO6N413hDz7xM=" crossorigin="anonymous"></script>                <div id="6ee11557-6ee5-4578-a1e4-2a175418184a" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("6ee11557-6ee5-4578-a1e4-2a175418184a")) {                    Plotly.newPlot(                        "6ee11557-6ee5-4578-a1e4-2a175418184a",                        [{"hovertemplate":"X=%{x}\u003cbr\u003ey_real=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"","marker":{"color":"#636efa","symbol":"circle"},"mode":"markers","name":"","orientation":"v","showlegend":false,"x":{"dtype":"f8","bdata":"MqLmaH0A8D\u002f7nqeKxU3wP7wvnDIIYfA\u002fZiKJlD9h8D+bvtDYV2HwP8K61dhXYfA\u002f19T2aSuA8D9GgsJaG0vxP65swvgjS\u002fE\u002fei+V2wtV8T9MOpt+HFbxP36ZgyURdfE\u002fMguE8jV18T8QjY9NRePxP5ttNzeRLfI\u002fhs43N5Et8j8iamaDuXTyPwkslGzddPI\u002fr7eR6eZ08j9lNNLp5nTyP\u002fQQuIvndPI\u002fwJs1payt8j8T+S2qrK3yPylTkEcnj\u002fM\u002fv+1dVSeP8z+r1vZk9CD1P0MfX+dDyfY\u002fO3ktKkTJ9j\u002fQmKFQiQT3P8ogteT1Mfc\u002fnuXAeRAy9z\u002fKUHftmDL3P6CI8KzYQfg\u002fSFmG6D3m+z\u002fEtNwAsPn7P\u002fyGCTGwAvw\u002fzGVkih+E\u002fT8bZNmeHqP9P4M7H1Ai1ABAHGA7bCLUAECM51NqsdQAQMXmu0CPIwFAZxBaTv8nAUD3mp1O\u002fycBQFJDpMqrSQFAz1rP3aNKAUA+JR\u002fRBFgBQFfAkc90cQFAI\u002fU2ZLJ6AkDD9sfLNYMCQIqdaLmRDgBA7g\u002fITPe9AECbXRcBZMwAQK13jTwGKgJA4zIkI90rAkCSPbKx3SsCQCOCx7TdKwJAqPnrzd0rAkCO3bW8NS8CQPZkfbebpANAmQSsg7WmA0DyYhej6PIDQIcGQdOw3gRA2Xi\u002fZ9JbBUAFku8\u002f6lsFQE\u002fPBLiOGwZAdZIKp20kBkB3WvjjbSQGQBF5DH6cJAZAi8Haail1BkDlruBqKXUGQH9mfpUqdQZAX6zy5St1BkBB9AD+LXUGQFlee1yMegZAdY7NL158BkD1tc0vXnwGQM752hygmAZAgdYcw0yZBkD80H8ZoJkGQO4QRHvi6AdAkczQTQztB0BMvu5opTUIQGhwrSDwSwhADmuLZvBLCEBdJaibFk0JQPqYNmj8ZgpAdw+j9Ya0C0DM\u002fasIEfcLQEYy73YS9wtAq9n6ABP3C0Amz8mTwhcMQCRJ86E+HQxAxNqHmn8dDECvi0yYYPkMQECwzw8XxQ5AmWRXlyWFD0AQUtZBrpEPQEwPKTK2kQ9Ai12hQX\u002fRD0AFaIGtADIIQMDbsIYIMghAbM35fDk4CEAIrsh71zgIQIMAynvXOAhATmkBvcc+CEAQ44DEt2kIQIrJT823aQhArJx8veHKCkDKQGoH4soKQDPIPV8S+wpAJ1zjlK3\u002fCkC\u002fXtqBwCELQNBilytO\u002fwxAjIym4KwwDUCbKL6PK5UNQLDsjPPplg1Aekyuq9SZDUAQI4oVRaQOQMDRM\u002foKHQ9A7H2TCZaED0Df4Ymmn4QPQDmLD5GMhRBAKV6+uuUdEUDydB9TCSIRQMV7IlMJIhFAezoLyn4kEUCF9FrYISURQF1Wdnw\u002fJhFAZmmnJVMmEUASNEQFtiYRQFua2QW2JhFAqp739jNAEUAMSE1aPqkRQK6fX30+qRFAu3qiD1ipEUDvF9Y8MwwSQC5ckqxrThJAlMLKVeNPEkBs\u002fMpV408SQNyIt8z6aBJAbrSIofSGEkBULAZa9oYSQBThUQj9hhJAFUYuX4ACE0AYgXODFOkTQGyxlQsg6RNA2\u002fLDCyDpE0Ah27nXQukTQHK\u002fQbJm6RNApx5cdQEAEECTmQTXrTcQQKiRXrwVWBBAsbM9z85TEUARINcs4FQRQPAe7rTziRFAyFOyRD+KEUCP\u002faEMiooRQNItfgzgjBFA\u002fKlplmoKEkDln8K5WlASQEZqW3vbYBJAoQUv\u002fNtgEkA1jBv922ASQKkJyYJ23BJAvzPbblbdEkAI\u002fcNLV94SQIvG4KB+3hJAGUg1iWsKE0Bs9IOH7QwTQJ4ipbOnDRNAIbvfd6YPE0B+gVOSXxATQPsELOi7FRNAN7GvadtmE0A1bcDENv8TQGwO56FADhRAUeVpzkgOFEAckJV0ug4UQIth7IcqFxRAKZH24k0aFEBETG5iYzkUQERMbmJjORRAed9OvLRAFEB53068tEAUQKVhO9dOQRRA62Cc9lBBFEBbrW+58UcUQMTSIObxRxRA5EaaWbxcFED2kI6a1l8UQBjyCafXXxRAEovTPazIFECWqg0vSckUQA1puJMp1xRAAJJhFkXXFEDPB5YWRdcUQJfINPytvxVAl+EPbbK\u002fFUAjQmVGs78VQCEQrPluHhRAM+6q3zKUFED5VD2oH8kUQH305yEgyRRAzKd7w23JFEAqaMZnb8kUQCJgzsY9zxRATCJVeEXPFEDqoqDuVs8UQDGFC4mQzxRA6bMVvJnPFECogjlw9c8UQBoEUwsI0BRAT25plUbVFEA7HAtkr9gUQHpIPKgV3RRA0+J6WdDdFEAz2OYE290UQJzxTjHc3RRARfX4rt3dFEAtEskj3t0UQOBb5x7ULBVAkQmvm9csFUBID6+b1ywVQHzGwqpRLRVAQp7DqlEtFUAQ8xqrUS0VQOEkBIp4LRVA51ClF7AtFUALWCrPITcVQDLGgDcmNxVA9HQNP\u002fA3FUAbaA1QajkVQCtK2S9uORVAe71rAtFUFUDsI\u002fc6xJMVQN8H8TEHgBZAG\u002f+TjzSvFkC9tCYMea8WQCkTJ3F7rxZAXAxWgnuvFkB4JbvW0FEXQLyiWu\u002fQURdASN4xuLUJGEDxkRd9WB8YQOiE8i\u002fdIRhA+QwA0nIwGEBeeeJUdkoYQD3HGoET\u002fBhATWkvoxv8GEALPAojAAAYQC7SHCQAABhA8uNOduoVGEC8QCoXrIwYQKU+Cu\u002ffpxhAzfe2wDmvGUACmlF4PK8ZQFZa4bRsGhpAeETGwmwaGkAxVF0U4SwaQHXqIrbliBpAtE2zDD2xGkDe\u002fNJ\u002fPrEaQN780n8+sRpAuwEtRD+xGkDn6jJEP7EaQIz3baY\u002fsRpAYP4qntzFGkBVsDD0K8YaQM7CPk0txhpADrqKTS3GGkDPK2npLgIbQF+VHiqUJRtAK4PL2ZcnG0B03fKwASobQJTs\u002fJJq3xtAuVquuTayHEAFT6W7NrIcQACj163xshxA\u002fHO7MTKzHEAQ7OdjtLMcQEq4uOAcMh1A3FEw9iNNHkAzI1O1bk0eQFnRgThvTR5AL3hdUcVNHkDbRd8Nl7AeQDDfUvNisx5AMN9S82KzHkApZqZkxLMeQF7zp\u002fTGQB9AwB4KztRAH0A1oVwAg7MfQO6BYgGKsx9ASFtCQMkVIEC00XxAyRUgQDL2wtrJFSBAqxeVdhgoIEDXpmCHGCggQPlYss2eNyBAj8TUJc5sHEDXo3+ekuEcQFAEG9KYJB1AcjSHOHZ0HUD3A53NdCQeQFYyFePx3B5Akwx4D\u002fLcHkBFp\u002f5NIBMfQByMkI7\u002fGx9AbHdGcTq0H0AFNRrcYzAgQIykYMzYMCBAAbIxdwyhIEBeit6Ukr8gQNR8O8CdvyBArVHLMp+\u002fIECtVDr9s78gQEMTGNSGGiFAeoHJ9IYaIUAKttdqkhwhQI7hcW6SHCFA0Xwur9IdIUD2QBTeLx4hQEVJ1\u002fzzJCFA+OhxfnAsIUAJ9gV\u002fcCwhQL6L4EkKMiFAvovgSQoyIUD7i6+dCjIhQI2HKIkTMiFAjzMzixMyIUBCf0WqEzIhQCi\u002fFBR9SyFAYXGpfX1LIUDFmgDGfUshQO70AKKoeCFAYIpXoqh4IUA1A2L\u002fU5AhQLi6\u002fNxpkCFAfE9z7amQIUC1a94gzPAhQG6PbTQwEiJAzVNIwwpmIkAfombix28iQLF00A\u002fKbyJAIwRrTrNwIkAk2z3CO3MiQD9Hp2ArgCJA9pO0+JmFIkDp24bE79IiQK3+Uyk\u002fBSBAqN9OPoAZIEAQONsyhBkgQHgBnxGOLyBACJ9\u002f29o9IEDl0Yvh2j0gQFSx3YjwPSBAEBKNHwdCIEBs5ODo9HIgQE\u002ftXer0ciBAPr3pGCePIEACCZB1ZZIgQPqf5nVlkiBAOFbiVtiTIEB7IZYh55MgQAwDcih6mCBAO23ePNyYIEAfN71h3JggQN0M1\u002f7cmCBAndWL4d6bIEAqTRCIt7QgQFLet6URuCBAXPSBixO4IECaVJddy7kgQESkLpMtuiBAIXbslS26IED+qF1LFu8gQBJ0ch4DDyFAHp6SWHQQIUDDc6ZYdBAhQLUfc7mFHCFAiuxXo\u002fEpIUAMb4Wj8SkhQIPuR28waiFAP1xQ1m5tIUBFcg6o63ghQEigYhYXgiFAuw3mrxiCIUB49vBt6uUhQKChIcMD6yFAMBXuz6v1IUD4+vKvBvkhQF2kUkoq+SFAwmxiNkEMIkAktJciTwwiQCpRsMbonCJABrkCubesIkCkvIYW4qwiQPus0TwErSJAHq3RPAStIkCZpN4kMAAiQE\u002fWMSUwACJADDR5H19YIkCIGsYuZVgiQKV1KID0WCJAzEoIM9JaIkCJACsl1lsiQOFZL9WWYiJAfpQmDIyTIkDSlkwMjJMiQD4PTQyMkyJAzvhNFY6TIkB0SCfinZQiQEUNtnfGlCJApy4vhA+VIkAeemRwwZUiQAU\u002fmUOz0yJA8cDGRzAiI0AysxnC6yUjQIbGVRjEKiNA+xJuOcQqI0BhaDUi0yojQA8IuAgWKyNADwi4CBYrI0CcOs1hjCsjQKGYPSTVPyNAQcTbxVOaI0DuhdlM25ojQAz\u002foI7eoSNAk46ay+OiI0A3wvXPPb4jQImWrHDP6iNAvkivl8\u002fqI0BoU0x7SCAkQGWnaXtIICRAI+dkwHlMJECJ45jAeUwkQDMXPf3ipCRAmfOplFuxJEAajC5aa78kQKQBaGFsvyRAwJiWP\u002fEEJUAMSlAR4wwlQGos3kQgDSVA\u002fXHeRy4NJUAD5NHqeiElQLgcGe16ISVAGhdvzjtRJUDSgVSXI4clQIzsHaAkhyVArlQXpJYAJEAJKvszmwAkQNQ3UGQEASRAEOKIweIEJEAUaJdl5wUkQM5NhYmpCiRAF83q6soRJEA1SfLryhEkQJcHp4TMESRAcpuPNBheJEC\u002f4JTSimskQLSwyuOVnSRASLHK45WdJEAPelLRorAkQLd9UtGisCRAF1jGN7OwJEC+8cFdSOAkQMHVURAL7iRA\u002f60ScGMSJUALS2KJ0xclQNJcJy7UGCVAQkVn5dQYJUAu61oP1RglQNgQnRLVGCVAYk8Dp9wYJUAg+fYd3xglQBgYbdGuMSVA+8Us5IyWJUBgRJNKjZYlQHVEk0qNliVAbFZhqHaoJUBqtkjyv7clQDoPvXH2wCVApVbbhy7lJUB3iJvQ3SAmQH0O7Ck9IiZAIY2ylgcjJkDNqOCsECYmQPMLKvFFsCZAEvIRCkawJkBLWNZfHLEmQEZTdRMKsyZATx2aqgqzJkAHDL2qCrMmQD7\u002fp9IMsyZACwOo0gyzJkB+Ki\u002fIFrMmQAL23T8xsyZAz+tYajGzJkCrr6kRRLMmQIl4EI4LACZAPPA1NwwAJkB6ePS9NR0mQLEJ6ug1HSZAhxpj6zUdJkDxRdpKxh0mQEzTQqodVSZAP1QNLt5YJkBpmuks+WAmQNkmWzyetCZAG\u002fgkN8y9JkATQvdsYNAmQK3TdfN91CZAruKgx+rVJkC+kHiOFOQmQEOheI4U5CZAD0NfTBtDJ0APPuIeiZ4nQDSOOY+snidAB7ZBchqfJ0A2XO6oww4oQJoXAAdcFShA0Wga8SEjKECdm11tIiMoQLj4DpgiIyhArjo70CIjKECRVILWIiMoQJ22ZOefMShAa5SAWvg4KEBNCGItjKsoQM9orL2qqyhA06VB5eWrKEBSFuA4BawoQPo0pFRZrihAi96kVFmuKEBsxnjBRNIoQKlEe8VE0ihAbCFualzSKEDqwdt2lxgpQCqu\u002fJXUqilAzLschzS0KUDcwi7xqeopQDm9k\u002fy67ClARnESRW95KkAwAsYmV5cqQKwGoIvlnypAMikwtY6nKkDnCLrTFLsqQLRvzgzxuypASSwphcfBKkCUAAAAAAAoQBVSEMd4AyhAQXBBWNIDKECqWQ\u002f02QMoQDNfD\u002fTZAyhAWUGe9tkDKEAZy7gMUAQoQCXLuAxQBChAFv+eAvEdKEDesa8gNx4oQJOR1Fg6HihAffZrS0AeKEDQblcQTh4oQA2\u002fm7hOHihAKS0zLNc7KEBYk0D61zsoQLpzOYWLPyhA1UIyPe1NKEAVaw9ZWk4oQILTiVlaTihAL0sF2FpOKEAaazkUsFQoQB0stCWyVChAhUkAY\u002fBUKEAgLWDlF1UoQBWkkx+KVyhAP4sBkJBXKEB8Tbhco1coQMkGHl2jVyhA8AfCXaNXKEAE2EgcwlsoQOJX56G5mChAshNMHdvgKEAfVfZfrEIpQK7eEQ42UilAHAi4JkFUKUAFEcgmQVQpQJBxo03OVClAZxgMvD1WKUDTKzO1g2IpQHdYQxGIYilAxYIKk+yMKUDFGcY8dacpQC1HAhroqylACSAmGuirKUAgSwLG8aspQAd\u002fqpqorilAshXrdIKvKUBivPfJla8pQCKnmizRrylA8JWQ6ZJhKkA3ZrCjlWEqQIlXg2qxYSpAVsT8LcdrKkDLeUCxfm4qQLdkJReBbipAfwidWkJvKkDcNhsLiXUqQGnLuNqDgSpAF9wbSoSBKkDfV+Z+StQqQOQKHT14FStA8PA0sQEZK0BxY7jXwForQB2uV+K1nCtAheYqCLecK0A1hA40CZ0rQDY2+stK\u002fitAsAVUAnH+K0BTI0+yhP4rQLWB23utECxAYNozsK0QLEDLt6Q+rhAsQHmb77SiMyxAVPLJXaJ6LEA1x6Z28HosQA7hC4c8gSxAN8PgtTyBLEAc0fxx+YMsQNIOOo9DiixASYlRWkyKLEBLpyE6TowsQHjNWDhY2yxAY4hZOFjbLECGjQ8Tyd0sQBGXbtHX3SxAcr6Ha73yLEAGrpNi8QMtQLb6eAFdEC1AY3pR82MQLUBKbfDuXTAtQEpt8O5dMC1AE\u002fLz7l0wLUBceREPXjAtQNsppOyEly1A07LQKyQBLkDG0esuJAEuQOnS6y4kAS5ASAF9zyAMLkDV2d6YgD8uQKDEQF8EAixA3UQJGpECLECSv4QV+AYsQOqc91X5BixARvyihVcHLEDWF4IogzssQAvL+Ng0PCxA4rO2tVGhLEDPCbHEe8osQCkZhbpgIi1A\u002f6qnZWQiLUDNVgdffSItQOpsSJGBIi1AcEuMii+gLUCiS7eLL6AtQL6yiYs3pS1AU\u002fxP6BfzLUAU2AfpF\u002fMtQODcF\u002f4X8y1AFwgaBhjzLUDIvAShGPMtQD5XyhUk8y1AKDe45R4QLkCEZSw7JBAuQMI7x9MkEC5AqZLH0yQQLkDCSasgJRAuQNBTLhPiFC5AFKJ3v0kiLkANuXe\u002fSSIuQEs7TMONTS5AyiV8KPZeLkBHsAuAKmAuQNfJIOFycy5AadIg4XJzLkDii2bkcnMuQCtkHOVycy5Akxa0okfKLkC8K+jS5xQvQLHnXAdTFS9AM2mgOoFcL0AzaaA6gVwvQDcfNT6mly9AWd4GUaeXL0CdpxTW6ZkvQImyFNbpmS9AzfIFee6ZL0Arz1PWk6YvQG\u002flxUFX3y9AU5sDn0zgL0A="},"xaxis":"x","y":{"dtype":"f8","bdata":"yUL6BejfkUAykTEhg+aiQBxdWOyGnJZA8rTuEI\u002fidED0ylNT5PqSQKKiJrzKmJZAHDOFjb0om0DRSm3ocHCWQFRoR6RIsHLAzNhlge9SnUBJZ0Ks5ICgQIaa4\u002fE9qoPAL5NZUMVvmEDU\u002foLtTtWkQHwnw7EgHIlAnur1Wp56j0Bz2yRh0rGVQESomgO3l6FAMKayl5QPokAUw0LN17KlQJGeRgSE7qtAAzs22dZSnEDab73wGB6UQMTkNhdlfadAyV41Z\u002f+soEBYs2c5hMuhQNIbAKuviYjAKq1pXeuPmkCu7ySc74moQJlcVJ+4vIdAZ5qlRIgGoEBdk5k2xPWgQFiuRGSimXdApO5RLbnanEBqI4KkOf+lQFyuSTs8eadALOYkT\u002fCbqkB+g153zkeSQC7RKq+lrodAFYhqYkFemkCcENE4hMqjQJqI815A+JhA7GTgGTvPpEC9otX8w5OqQDisSIq99K9AcGGEyD6tsUCcx5J8k0SxQDAc+9igK25ABgqCmnFyrEDSRb\u002fB5Z6bQKY4yJmYyppAJvFoRwrag0DScY8xSoevQM7q\u002fujwKpxAbITHfVhtnUBgSGLEN\u002f6rQFmlGUpP+KdACI3KGYQUo0DV37AvpJGrQERQ0mF3qKNArT+gw0HelUCwXYMLIYuxQIyxpasznLNAWmczwtZbrkBQYiEu+kegQICQgqY9gKBAkRStqQd6p0Cv3YeSJJyqQB5MLDZk2qdA8cXmR\u002fYDsEC8Fcz2+RClQBGd8LNEeadA2lPHrSN4rkBKQl7OeTKsQMbQ0CpTRqRAlVUeMxQBqUCqBJFO9ySrQESk+kmwzpFAwZ2zEN0Js0AKwVrm9gmvQOKeWYj5sa1Ah8Y0afG8rkCVFtbnmkiuQOwN4JZQmLBApX27IyYOo0A8DHYppiuoQPJiM1nj7KtA+Nkq62I4pUA0Q4I4Y1ilQNvgSv8knrNAfZu7Vk58okDYGyby8FWyQK+0EDuLbqBAZnX2+QRPsUAbjxtSmKOrQFo\u002fc+aksbhA1bIMSnsFs0Aci2vDWLCxQAslXz6eSrFAw0YGJjHRs0AdGStmd4ylQBAtd7Fq6ahAoBjgc6ocm0DaoSdsTCmsQEPRRcxI1rBAEOq+OVfuoUCQwqquoYy1QDgvf6oIbKJA+pfzrueTskAr6fjzkMWgQMQ6kBq8qrVAqPBIlAP0oECEOy2pVjq0QIPBZ0vGjbJAyP0rZso8qEA8njN8hIelQCGrrzwnk6ZAcUfyHuagtEDK4T1YiCCuQGb5gQt+Gq9AwhWlm573s0BiOfe1tresQA6diZVQVLdAPh+ymvvHpkB5xDdykfu1QOlchTkGCbdAPGLKSbOysEBIJAmSZNu1QIYglJy2I7BA\u002fkr5zDE7tkCdT14m9rG1QBw01H6VWKRAjA2vnGy9sUBcOHwJtsS1QBwiB+Kq4LRAwDMCVVF1pUA2peTQ\u002fJSpQP+rn3DRRbNAEQlka25cs0Avb6XtI8isQAaTZN9h07BAgN62Dk6BskB2zLtTrtqwQKfSM0aHmrBAQctnkgBItUCxwymEofytQJ\u002fGpY\u002fzELRAhVS93bxitEDO4u3Qxfe3QA1znScoCrZA89cjogO5tkDN+hNy77y0QNp2doiCfLZAeIggrsCztECJaeyp3RCjQDzHW00JE7ZAmmKYFpWKr0Bjx5le4vOzQGhYA6+N751Ahm5abmBPskB1kWxnV+y2QMZhT6E\u002fmbRAu8b0LYxetECw2uAbjJ+mQI0TvF05lLxAG1j\u002fzjZ9tEC8m2nwkHm2QFb12w+wfbRAFvc5RFB1s0Au9LeQhhewQJo35vv0xLJAhpbP28UJs0DQQ98RSrWtQCvhROMD1rVAxhRm\u002feaDs0AsuF9uOEWzQPh6YI8W8LZA7WaZFCBKt0B0IVBUEWm3QAQxzVoyMqtARnHZ+TRqt0A2cnEUfVq3QDxz78K8lrJAJZT08f+lukAKwFCX3ty3QN826rnI6LVAWS9LnXMLt0BULbaDRP+1QDlhSW5c\u002fLZAtJRY6Hx7sEComN79EOCzQB8nHqfBFbFAxn4d6aIZsUCPAv1Eg0+0QMQSb3KkQbxAf1M4zHoCvkAfmr4TNbO3QBzUx0qUt7JAMItxDGYbtUDUc8Slx8ezQL9x4UezkrVAHXWEkEHsuEDyFA0v48O\u002fQAdU5BPOobVAfBKRO4vdskDSisKW9F6vQG2PBOXnebBAQSBEpPDisUC\u002f1UKxwAK1QDPYX8wml7VA8wBUtPeUukAkiBJhUxW0QObf\u002fmio1bxA0WePpAuwskA0sO+RNNm4QJzS+SOnYrZA0siZw\u002fAktEDmalNkALCzQDZuqwvLZrVA9fpiRkJSukBOZ2hzknOvQHB93L2BirhAWccg\u002fPoXsUCMJObnJrmyQCSVVHpro7FAN+eTslzMuUBfskUyge+vQOd3I\u002f37IrpA4Ge+FoR7skDUD\u002fFNX\u002f+1QLeimmdsiLhAOSIHvLYgsUA\u002f5G9svcOzQF\u002fcWl5EUrlA2ufTxT52t0AqhKTjMMi6QPqNvATn17lAnJTcW9oEu0A1UH2F\u002fsSyQJGrLeLUwrlAp+CFNUqPt0D3FX8DOoWwQHTJDxxy0rdAgGhkUo7PuEBzZF1kUUm8QFXuIZIhK7xAE2WAfSlxuEAqSR33VUO+QNWFsx+IC71ApLeinyZOskDSfbZhrym1QEgKteOx\u002fbdAZMUqyZILvEAY0kXj+MW0QGLO6KjOD7NALiQA2ar0vUCql+EHP3q6QMIPi0SxgblA3garaqrgukCiJf1TJPm2QGiwPxgVpbpAdrMEgcAxt0DK2zTTbTm0QBpKEPHdf75AC4NBlmhoukDOElUOhJS1QHNbpqEZjbVARzviqdpdukAdWILz36q4QB0iYb5O0r1Ag\u002fc3gpzOukCgmvFwjLK9QGohEu5uCLxAIEtDVMxuvUBdhaGQnHbAQI3vp6EuWrxAu10DBKgzvUChWdCT3Ku7QGJAcUVRyLpAdR4aledAvEA8Eejp2+a6QIGPWwafP7xAKbPxz4EDu0AZsaZS4cK\u002fQBntR6qfLr5AhxbN1FEJvkARQGSIoFPAQNMZH2G\u002fPLtA1QRAfJZGwECzryGM5zy6QIGZPDQ+isBAGgw7EpEuwUDGZLWlKljAQFEgafd81b5AVhlnz2CTuUCjSVMQq9fBQArAtwZVE75A5Qzuxq2mwEC5GAShombBQLwtNQf+3sBAopcsspvdt0D6xeFVaji4QN7d02ycg7pAVNFxBuvWv0CU1YPMhFnCQMshBg6SsMFAPc3g\u002fOMGwUBDho\u002f+5ivAQL53dd49O71A8dHVjH5nwEB5JHfJYBe8QKqOAhpMM8JAR2Vml4+svkCvMdkSsRu\u002fQNdFCjra0sBApH+Fy0whwkBq0+59Uau\u002fQEzNH44BlcFAjRsHX\u002fM\u002fw0DASvEsHZnDQH0T448QpsNAM8jHyZxpwkDy+frO4fq\u002fQOuIzyFpn8BAa1cSU015wEBf2Ugh1au\u002fQGd3qQBLMsBA8Hmq5LlruUCQoQDFVT\u002fCQAaBRwWIDcRAmuz7Pb1JwUA5dczSZWfCQPiiRn8CjL5AjNaSw7suwECwsmx\u002fydjCQA45XndJDMJA6SPonKjgw0A6g50A65fAQHiTnCb+zb5A\u002f9GlwoJWv0BD7ZlwjAbAQLklzDgiF8RAXzROb5bXwUBVpxctFLzCQO+bOpV01sFAlb1lf+DgwkBLGXEbICTDQJAfHBSojsVAPcFf0+enxEAHxe\u002fGyoLDQN4EZmBBtrtAIcX\u002fT9tBukCSNMZKZAbCQGoUo3Usu8BAoYuwVC5ev0AbyJ6N79K\u002fQAyuMyklRcFAOVec9LlXvkAM\u002f5oaYmC\u002fQAJGamMsRb5AIYGDliXgwkAostGalwHAQAa3MF70gL1A+XBjmgFawEAf+g3LwerBQCFqKkdkXMFAeHIcnhP2wEDZAe+P8TrBQD6\u002f6ArNBsJAQjQJEWXawECyb9uZYMPAQCqThQgHF71A5HkVfkPrwUDfb04wxpfCQKSi8Hu\u002fgMRA9RBikV3\u002fw0B6Ni38WLvBQOF39tyUqsJA8gyzDAuBwEB+qbc7HlrDQKzM5qlQNMVAsWCELv7DwUDEz2oB883CQPb0LesVZ8BAOxl1l3pHwEBs1rqesfS9QGXNe57PkcBAYMN8QgdHvkBv7qDyisPBQIDwi0Ds0MNAXYEtZOruv0B+FcAByYLAQJDTBJmip8BAoLwZn0WawkA+lBPwkurBQHHaZ4+JHsVAzEp0haufw0B7X+ya\u002fbnCQKz4u78YfMZAvhFhXGp+wUBSXB5GO4HBQCLfHAAtsb5AskFcsq+Bw0Bpfx3c83fCQOdas1XmcMFAttW+IfA4w0CEnlWfwVrBQOqemlP01MBAr+pO5LhSwUBzQoteETTCQMps8fG0isNAWpWtqYstvkBt2eqiFyzBQCa9b4OWOsNAtkHgAfxAwEDro8qECQXHQJYhkphW18FAlkZPuloHxkBEzjAOukLEQFt4\u002fIrAg8JAtylkdDrpvkCqkdnz2GvDQJXsJiyKNsJAXwKD\u002f10GxkBHYVYLrA7CQH5s6X69RsVAU9Q25xJmxEA9Z3SfveXFQKVk7ibLasVAD1rVBSz3w0AOAJsLEazDQP\u002f8dRhiM8RAsEh8Bd9nw0BVwP0tyzvDQNPswNnK\u002f8ZAl06jiM2AxkCpAFvTx62\u002fQF7+SAzXo8ZAjDUSu+\u002fKxEAnA5XfKrTGQPxIVPDQuMJA9YljtbHBxUBCPWN7MVXBQGmdSHfCMsJAZLMtb02RyEA14gLB+oXCQLE4ZybwtspAYsi1BuYQxkDN+bxrIi3HQF6JXy83TcVAH4AEAmF0xkD3RiiC6VDFQAwyMzXYDMZADw9mwMORxEB8KqJLnrHDQJJtJMWHRcZAr2+42MzRx0BeBFwYx+fEQN27ZVsaHsRA5pdqRLdvyEDMJrbuSmnEQB6fydqCA8RAJ+536yZCxECUOJWjk+7EQHRcQRYQsMVAfLOIaEUzykAGh5ffoqbDQBj4mTT39MRAOxAV8jA0xUDqlXNWMizEQA1l0n+VncZAgDyszfuQxECvvIwPr5jBQOxPzmHX5cNA\u002fk6V\u002fwfVx0ABTEdhQQvFQFUJ9qYGmcNANgV59q9gxUDr6oLwmJnFQF\u002f7TEsZOclAelzouB0WxUBBEU91ubvHQKFHJRx2mMVAsYjLfRfCyEDkPVHBkCTDQBnO5SzIfcZAsYOWHKOLx0BjXbK9covHQJtxfu3eRsRABSNVxIzyxEBgtmBm4VPGQAZoTJkdosVAk2iNHxkhx0DXa6bYisLCQJbCOiUMHsdAoCnfUh1AyEBjDhtft\u002fvDQJYy4Vy108VApGm6UgdPyECyE8VcG63GQOG5K3lx3sZA0VWWnjifyEC1sA\u002fk5NbFQH2PH5yX8cZAR5PswixdxUBZLYzjPyfHQCu143qgs8VAhDiAhGA1yEBJ0nj\u002fgyXJQK227mpAR8NAV75GSpFkxUC76MNpywDEQKgTSCUYnMlAmXw7u4q6xEDP5D7j\u002fmfGQG0sy69WeMhAuIBO+0PXx0DWrOzMnGbIQJnm9\u002fKx3cZAv6HOIrdcyUBOIR8RKUfJQNVgviRiO8hAQJHPSEAjyUAi6SyP8WXFQHLBHQSvGMlAzFHD5vKLx0Bkbp6Rr7TGQCb7X1lNW8dA72rr3SH6xUB3sqkSuOvIQMAjm53H2clA2ZZzv3Zwx0BWJt2pM6rLQDsWxYehm8hAIM1B+wwEzkAB4T6VIcrIQEXKAQ7kY8xAD19y59V+xkCqjj0QM0zHQHRK0kQSYchACdCFGh6iyUBk6fS5fJ\u002fHQMZmy4u\u002fUclAZ3lhPzITzUDz6nByTHPKQPIOh9Y\u002fNsZAydz\u002fnKcBy0Dai6s6AzTKQNTRxDRwO8tA+hf0t7Nzy0ABW+o7l03FQEFyOQmAysZAwHMpBDxbyUB07XeGABnFQL0\u002f64LfIshAVGLulShHyEBaPxjvGtjHQCMYA9emxsdAyzlLuc4YyUBjrVnjJHfIQAhrKdUL3shAX2DCxxVaxEA94WjykxnIQMpGW7fJ98VAJoso8rwJy0BrD71\u002fbuTHQJm5YJsAbsRAGa06160byUDvSYS80ivJQMH9\u002f\u002fiqt8ZAkvvgssMgyECcGteTDUPFQD3YzpIbj81AyrtgtnzYx0CvfO+5i2HKQBw5nmB3h8ZAslg\u002fZMcxx0C78hNxzV7JQKZcVC+JPMpAz5tko3iQx0CKEjMpUJfJQEI3jbSTS8hA\u002f1h785nfxkDze8fZfXLHQGgU0BTbm8lAMi8oyHkty0ChNgL41evKQFz3X7L4VsdACMX7cZReyEA0O9psMxXKQF6wHFvca8tAkB964SQox0Aj5TMdBFPGQJb8mqIwgcdAj2C9QwpGy0Dt2k+HO4vIQNPfzkKPLshAMzXQctrvyEBw+KY2GULMQF6uPwEX9MtA+cgnKB2HykDv+kHwQvXGQBhoyX7JpspASYDj03ovykDD3JYpvODOQCKEt7cEus5AzGY\u002f8AkEzUCIbaw5jODHQOpjkQziM8VAS0Y4vbfAyUDKMurAeyPOQMMWG9fDS8hARU\u002fkUVn8zECRI4h4ybrJQMCs9EIc1stAqLV8\u002fRHUy0Asil9Jy+3KQMKMok7qWs1AzsPXmqiCyUAYntMfE3zLQKND+EI\u002fgcpA1z3\u002faREYy0B\u002fE720eCbOQG9Jq2QUp89ApXXIxWdYy0CaJIAy7RnOQDwqbP4jIM5AtcVugNa0zEDO5WN0x8rMQDumSfLMws1AqnuKGKg9zUBEbrAX3ADMQG8LmOU\u002fMstABQoXznRozEBgNKZb+6LQQBLK\u002f9mxK8xAb3vXbhzoykDIXSue513QQKVssFrXMNBA65xKKxthzkA746lVqnLLQE7qfpgZycxAqpw0csiUzUCjjmMfzD\u002fLQCY5AiGMLMxAKycR75u7zkAlbHc5mXTNQIX0f9+I18tAs6jkApGTy0CitFznrZnJQD2NfgCLWspA2aotQwAUyUBvKMWgB0jPQAOd8c+\u002f181As2\u002fesILLzUApcXYb86fLQPnTfyhLRsdABWJ8nJNszUBHd321CcfNQNHWfvP1bc5AcLQxwzauykDgsnrss8jJQApRvpFTOspA3sBDdFpezUDUk8fKmvPLQC6tmKHuP8xAEVDkCtw5z0C\u002f\u002f47gdNfNQLye8gP3p9BA4ak981HDzkCzr4onmxjNQP7NN928TtBAnR9fGgstzUBa8lMPfTjNQCced8CLDMtAu\u002fOGiitLykCM7j8GYWrQQCUZdPudlMtAjFqg7ZoLzEBQls\u002fdGwDNQM4Mvl5HUNBAOkhpRqfVzEAtWDc9HU3PQCT2EJCT48pAiqJ0ggO+zkDMGoqozW7OQG873qUcmM1Aiz69wIa1zkBStNAuccbOQOg\u002fIoObntBAehl1tbtJ0EAX5He12BfQQOOzcXNmZNFAPbXHbRpAz0BAZtbc7orOQKl4rqr8JtBAfBG++aAx0UC6e3kizJ3MQJnJZb8bhM9Ahfk8xeTAz0A="},"yaxis":"y","type":"scatter"},{"hovertemplate":"X=%{x}\u003cbr\u003ey_pred=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"","line":{"color":"#636efa","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines","name":"","orientation":"v","showlegend":false,"x":{"dtype":"f8","bdata":"MqLmaH0A8D\u002f7nqeKxU3wP7wvnDIIYfA\u002fZiKJlD9h8D+bvtDYV2HwP8K61dhXYfA\u002f19T2aSuA8D9GgsJaG0vxP65swvgjS\u002fE\u002fei+V2wtV8T9MOpt+HFbxP36ZgyURdfE\u002fMguE8jV18T8QjY9NRePxP5ttNzeRLfI\u002fhs43N5Et8j8iamaDuXTyPwkslGzddPI\u002fr7eR6eZ08j9lNNLp5nTyP\u002fQQuIvndPI\u002fwJs1payt8j8T+S2qrK3yPylTkEcnj\u002fM\u002fv+1dVSeP8z+r1vZk9CD1P0MfX+dDyfY\u002fO3ktKkTJ9j\u002fQmKFQiQT3P8ogteT1Mfc\u002fnuXAeRAy9z\u002fKUHftmDL3P6CI8KzYQfg\u002fSFmG6D3m+z\u002fEtNwAsPn7P\u002fyGCTGwAvw\u002fzGVkih+E\u002fT8bZNmeHqP9P4M7H1Ai1ABAHGA7bCLUAECM51NqsdQAQMXmu0CPIwFAZxBaTv8nAUD3mp1O\u002fycBQFJDpMqrSQFAz1rP3aNKAUA+JR\u002fRBFgBQFfAkc90cQFAI\u002fU2ZLJ6AkDD9sfLNYMCQIqdaLmRDgBA7g\u002fITPe9AECbXRcBZMwAQK13jTwGKgJA4zIkI90rAkCSPbKx3SsCQCOCx7TdKwJAqPnrzd0rAkCO3bW8NS8CQPZkfbebpANAmQSsg7WmA0DyYhej6PIDQIcGQdOw3gRA2Xi\u002fZ9JbBUAFku8\u002f6lsFQE\u002fPBLiOGwZAdZIKp20kBkB3WvjjbSQGQBF5DH6cJAZAi8Haail1BkDlruBqKXUGQH9mfpUqdQZAX6zy5St1BkBB9AD+LXUGQFlee1yMegZAdY7NL158BkD1tc0vXnwGQM752hygmAZAgdYcw0yZBkD80H8ZoJkGQO4QRHvi6AdAkczQTQztB0BMvu5opTUIQGhwrSDwSwhADmuLZvBLCEBdJaibFk0JQPqYNmj8ZgpAdw+j9Ya0C0DM\u002fasIEfcLQEYy73YS9wtAq9n6ABP3C0Amz8mTwhcMQCRJ86E+HQxAxNqHmn8dDECvi0yYYPkMQECwzw8XxQ5AmWRXlyWFD0AQUtZBrpEPQEwPKTK2kQ9Ai12hQX\u002fRD0AFaIGtADIIQMDbsIYIMghAbM35fDk4CEAIrsh71zgIQIMAynvXOAhATmkBvcc+CEAQ44DEt2kIQIrJT823aQhArJx8veHKCkDKQGoH4soKQDPIPV8S+wpAJ1zjlK3\u002fCkC\u002fXtqBwCELQNBilytO\u002fwxAjIym4KwwDUCbKL6PK5UNQLDsjPPplg1Aekyuq9SZDUAQI4oVRaQOQMDRM\u002foKHQ9A7H2TCZaED0Df4Ymmn4QPQDmLD5GMhRBAKV6+uuUdEUDydB9TCSIRQMV7IlMJIhFAezoLyn4kEUCF9FrYISURQF1Wdnw\u002fJhFAZmmnJVMmEUASNEQFtiYRQFua2QW2JhFAqp739jNAEUAMSE1aPqkRQK6fX30+qRFAu3qiD1ipEUDvF9Y8MwwSQC5ckqxrThJAlMLKVeNPEkBs\u002fMpV408SQNyIt8z6aBJAbrSIofSGEkBULAZa9oYSQBThUQj9hhJAFUYuX4ACE0AYgXODFOkTQGyxlQsg6RNA2\u002fLDCyDpE0Ah27nXQukTQHK\u002fQbJm6RNApx5cdQEAEECTmQTXrTcQQKiRXrwVWBBAsbM9z85TEUARINcs4FQRQPAe7rTziRFAyFOyRD+KEUCP\u002faEMiooRQNItfgzgjBFA\u002fKlplmoKEkDln8K5WlASQEZqW3vbYBJAoQUv\u002fNtgEkA1jBv922ASQKkJyYJ23BJAvzPbblbdEkAI\u002fcNLV94SQIvG4KB+3hJAGUg1iWsKE0Bs9IOH7QwTQJ4ipbOnDRNAIbvfd6YPE0B+gVOSXxATQPsELOi7FRNAN7GvadtmE0A1bcDENv8TQGwO56FADhRAUeVpzkgOFEAckJV0ug4UQIth7IcqFxRAKZH24k0aFEBETG5iYzkUQERMbmJjORRAed9OvLRAFEB53068tEAUQKVhO9dOQRRA62Cc9lBBFEBbrW+58UcUQMTSIObxRxRA5EaaWbxcFED2kI6a1l8UQBjyCafXXxRAEovTPazIFECWqg0vSckUQA1puJMp1xRAAJJhFkXXFEDPB5YWRdcUQJfINPytvxVAl+EPbbK\u002fFUAjQmVGs78VQCEQrPluHhRAM+6q3zKUFED5VD2oH8kUQH305yEgyRRAzKd7w23JFEAqaMZnb8kUQCJgzsY9zxRATCJVeEXPFEDqoqDuVs8UQDGFC4mQzxRA6bMVvJnPFECogjlw9c8UQBoEUwsI0BRAT25plUbVFEA7HAtkr9gUQHpIPKgV3RRA0+J6WdDdFEAz2OYE290UQJzxTjHc3RRARfX4rt3dFEAtEskj3t0UQOBb5x7ULBVAkQmvm9csFUBID6+b1ywVQHzGwqpRLRVAQp7DqlEtFUAQ8xqrUS0VQOEkBIp4LRVA51ClF7AtFUALWCrPITcVQDLGgDcmNxVA9HQNP\u002fA3FUAbaA1QajkVQCtK2S9uORVAe71rAtFUFUDsI\u002fc6xJMVQN8H8TEHgBZAG\u002f+TjzSvFkC9tCYMea8WQCkTJ3F7rxZAXAxWgnuvFkB4JbvW0FEXQLyiWu\u002fQURdASN4xuLUJGEDxkRd9WB8YQOiE8i\u002fdIRhA+QwA0nIwGEBeeeJUdkoYQD3HGoET\u002fBhATWkvoxv8GEALPAojAAAYQC7SHCQAABhA8uNOduoVGEC8QCoXrIwYQKU+Cu\u002ffpxhAzfe2wDmvGUACmlF4PK8ZQFZa4bRsGhpAeETGwmwaGkAxVF0U4SwaQHXqIrbliBpAtE2zDD2xGkDe\u002fNJ\u002fPrEaQN780n8+sRpAuwEtRD+xGkDn6jJEP7EaQIz3baY\u002fsRpAYP4qntzFGkBVsDD0K8YaQM7CPk0txhpADrqKTS3GGkDPK2npLgIbQF+VHiqUJRtAK4PL2ZcnG0B03fKwASobQJTs\u002fJJq3xtAuVquuTayHEAFT6W7NrIcQACj163xshxA\u002fHO7MTKzHEAQ7OdjtLMcQEq4uOAcMh1A3FEw9iNNHkAzI1O1bk0eQFnRgThvTR5AL3hdUcVNHkDbRd8Nl7AeQDDfUvNisx5AMN9S82KzHkApZqZkxLMeQF7zp\u002fTGQB9AwB4KztRAH0A1oVwAg7MfQO6BYgGKsx9ASFtCQMkVIEC00XxAyRUgQDL2wtrJFSBAqxeVdhgoIEDXpmCHGCggQPlYss2eNyBAj8TUJc5sHEDXo3+ekuEcQFAEG9KYJB1AcjSHOHZ0HUD3A53NdCQeQFYyFePx3B5Akwx4D\u002fLcHkBFp\u002f5NIBMfQByMkI7\u002fGx9AbHdGcTq0H0AFNRrcYzAgQIykYMzYMCBAAbIxdwyhIEBeit6Ukr8gQNR8O8CdvyBArVHLMp+\u002fIECtVDr9s78gQEMTGNSGGiFAeoHJ9IYaIUAKttdqkhwhQI7hcW6SHCFA0Xwur9IdIUD2QBTeLx4hQEVJ1\u002fzzJCFA+OhxfnAsIUAJ9gV\u002fcCwhQL6L4EkKMiFAvovgSQoyIUD7i6+dCjIhQI2HKIkTMiFAjzMzixMyIUBCf0WqEzIhQCi\u002fFBR9SyFAYXGpfX1LIUDFmgDGfUshQO70AKKoeCFAYIpXoqh4IUA1A2L\u002fU5AhQLi6\u002fNxpkCFAfE9z7amQIUC1a94gzPAhQG6PbTQwEiJAzVNIwwpmIkAfombix28iQLF00A\u002fKbyJAIwRrTrNwIkAk2z3CO3MiQD9Hp2ArgCJA9pO0+JmFIkDp24bE79IiQK3+Uyk\u002fBSBAqN9OPoAZIEAQONsyhBkgQHgBnxGOLyBACJ9\u002f29o9IEDl0Yvh2j0gQFSx3YjwPSBAEBKNHwdCIEBs5ODo9HIgQE\u002ftXer0ciBAPr3pGCePIEACCZB1ZZIgQPqf5nVlkiBAOFbiVtiTIEB7IZYh55MgQAwDcih6mCBAO23ePNyYIEAfN71h3JggQN0M1\u002f7cmCBAndWL4d6bIEAqTRCIt7QgQFLet6URuCBAXPSBixO4IECaVJddy7kgQESkLpMtuiBAIXbslS26IED+qF1LFu8gQBJ0ch4DDyFAHp6SWHQQIUDDc6ZYdBAhQLUfc7mFHCFAiuxXo\u002fEpIUAMb4Wj8SkhQIPuR28waiFAP1xQ1m5tIUBFcg6o63ghQEigYhYXgiFAuw3mrxiCIUB49vBt6uUhQKChIcMD6yFAMBXuz6v1IUD4+vKvBvkhQF2kUkoq+SFAwmxiNkEMIkAktJciTwwiQCpRsMbonCJABrkCubesIkCkvIYW4qwiQPus0TwErSJAHq3RPAStIkCZpN4kMAAiQE\u002fWMSUwACJADDR5H19YIkCIGsYuZVgiQKV1KID0WCJAzEoIM9JaIkCJACsl1lsiQOFZL9WWYiJAfpQmDIyTIkDSlkwMjJMiQD4PTQyMkyJAzvhNFY6TIkB0SCfinZQiQEUNtnfGlCJApy4vhA+VIkAeemRwwZUiQAU\u002fmUOz0yJA8cDGRzAiI0AysxnC6yUjQIbGVRjEKiNA+xJuOcQqI0BhaDUi0yojQA8IuAgWKyNADwi4CBYrI0CcOs1hjCsjQKGYPSTVPyNAQcTbxVOaI0DuhdlM25ojQAz\u002foI7eoSNAk46ay+OiI0A3wvXPPb4jQImWrHDP6iNAvkivl8\u002fqI0BoU0x7SCAkQGWnaXtIICRAI+dkwHlMJECJ45jAeUwkQDMXPf3ipCRAmfOplFuxJEAajC5aa78kQKQBaGFsvyRAwJiWP\u002fEEJUAMSlAR4wwlQGos3kQgDSVA\u002fXHeRy4NJUAD5NHqeiElQLgcGe16ISVAGhdvzjtRJUDSgVSXI4clQIzsHaAkhyVArlQXpJYAJEAJKvszmwAkQNQ3UGQEASRAEOKIweIEJEAUaJdl5wUkQM5NhYmpCiRAF83q6soRJEA1SfLryhEkQJcHp4TMESRAcpuPNBheJEC\u002f4JTSimskQLSwyuOVnSRASLHK45WdJEAPelLRorAkQLd9UtGisCRAF1jGN7OwJEC+8cFdSOAkQMHVURAL7iRA\u002f60ScGMSJUALS2KJ0xclQNJcJy7UGCVAQkVn5dQYJUAu61oP1RglQNgQnRLVGCVAYk8Dp9wYJUAg+fYd3xglQBgYbdGuMSVA+8Us5IyWJUBgRJNKjZYlQHVEk0qNliVAbFZhqHaoJUBqtkjyv7clQDoPvXH2wCVApVbbhy7lJUB3iJvQ3SAmQH0O7Ck9IiZAIY2ylgcjJkDNqOCsECYmQPMLKvFFsCZAEvIRCkawJkBLWNZfHLEmQEZTdRMKsyZATx2aqgqzJkAHDL2qCrMmQD7\u002fp9IMsyZACwOo0gyzJkB+Ki\u002fIFrMmQAL23T8xsyZAz+tYajGzJkCrr6kRRLMmQIl4EI4LACZAPPA1NwwAJkB6ePS9NR0mQLEJ6ug1HSZAhxpj6zUdJkDxRdpKxh0mQEzTQqodVSZAP1QNLt5YJkBpmuks+WAmQNkmWzyetCZAG\u002fgkN8y9JkATQvdsYNAmQK3TdfN91CZAruKgx+rVJkC+kHiOFOQmQEOheI4U5CZAD0NfTBtDJ0APPuIeiZ4nQDSOOY+snidAB7ZBchqfJ0A2XO6oww4oQJoXAAdcFShA0Wga8SEjKECdm11tIiMoQLj4DpgiIyhArjo70CIjKECRVILWIiMoQJ22ZOefMShAa5SAWvg4KEBNCGItjKsoQM9orL2qqyhA06VB5eWrKEBSFuA4BawoQPo0pFRZrihAi96kVFmuKEBsxnjBRNIoQKlEe8VE0ihAbCFualzSKEDqwdt2lxgpQCqu\u002fJXUqilAzLschzS0KUDcwi7xqeopQDm9k\u002fy67ClARnESRW95KkAwAsYmV5cqQKwGoIvlnypAMikwtY6nKkDnCLrTFLsqQLRvzgzxuypASSwphcfBKkCUAAAAAAAoQBVSEMd4AyhAQXBBWNIDKECqWQ\u002f02QMoQDNfD\u002fTZAyhAWUGe9tkDKEAZy7gMUAQoQCXLuAxQBChAFv+eAvEdKEDesa8gNx4oQJOR1Fg6HihAffZrS0AeKEDQblcQTh4oQA2\u002fm7hOHihAKS0zLNc7KEBYk0D61zsoQLpzOYWLPyhA1UIyPe1NKEAVaw9ZWk4oQILTiVlaTihAL0sF2FpOKEAaazkUsFQoQB0stCWyVChAhUkAY\u002fBUKEAgLWDlF1UoQBWkkx+KVyhAP4sBkJBXKEB8Tbhco1coQMkGHl2jVyhA8AfCXaNXKEAE2EgcwlsoQOJX56G5mChAshNMHdvgKEAfVfZfrEIpQK7eEQ42UilAHAi4JkFUKUAFEcgmQVQpQJBxo03OVClAZxgMvD1WKUDTKzO1g2IpQHdYQxGIYilAxYIKk+yMKUDFGcY8dacpQC1HAhroqylACSAmGuirKUAgSwLG8aspQAd\u002fqpqorilAshXrdIKvKUBivPfJla8pQCKnmizRrylA8JWQ6ZJhKkA3ZrCjlWEqQIlXg2qxYSpAVsT8LcdrKkDLeUCxfm4qQLdkJReBbipAfwidWkJvKkDcNhsLiXUqQGnLuNqDgSpAF9wbSoSBKkDfV+Z+StQqQOQKHT14FStA8PA0sQEZK0BxY7jXwForQB2uV+K1nCtAheYqCLecK0A1hA40CZ0rQDY2+stK\u002fitAsAVUAnH+K0BTI0+yhP4rQLWB23utECxAYNozsK0QLEDLt6Q+rhAsQHmb77SiMyxAVPLJXaJ6LEA1x6Z28HosQA7hC4c8gSxAN8PgtTyBLEAc0fxx+YMsQNIOOo9DiixASYlRWkyKLEBLpyE6TowsQHjNWDhY2yxAY4hZOFjbLECGjQ8Tyd0sQBGXbtHX3SxAcr6Ha73yLEAGrpNi8QMtQLb6eAFdEC1AY3pR82MQLUBKbfDuXTAtQEpt8O5dMC1AE\u002fLz7l0wLUBceREPXjAtQNsppOyEly1A07LQKyQBLkDG0esuJAEuQOnS6y4kAS5ASAF9zyAMLkDV2d6YgD8uQKDEQF8EAixA3UQJGpECLECSv4QV+AYsQOqc91X5BixARvyihVcHLEDWF4IogzssQAvL+Ng0PCxA4rO2tVGhLEDPCbHEe8osQCkZhbpgIi1A\u002f6qnZWQiLUDNVgdffSItQOpsSJGBIi1AcEuMii+gLUCiS7eLL6AtQL6yiYs3pS1AU\u002fxP6BfzLUAU2AfpF\u002fMtQODcF\u002f4X8y1AFwgaBhjzLUDIvAShGPMtQD5XyhUk8y1AKDe45R4QLkCEZSw7JBAuQMI7x9MkEC5AqZLH0yQQLkDCSasgJRAuQNBTLhPiFC5AFKJ3v0kiLkANuXe\u002fSSIuQEs7TMONTS5AyiV8KPZeLkBHsAuAKmAuQNfJIOFycy5AadIg4XJzLkDii2bkcnMuQCtkHOVycy5Akxa0okfKLkC8K+jS5xQvQLHnXAdTFS9AM2mgOoFcL0AzaaA6gVwvQDcfNT6mly9AWd4GUaeXL0CdpxTW6ZkvQImyFNbpmS9AzfIFee6ZL0Arz1PWk6YvQG\u002flxUFX3y9AU5sDn0zgL0A="},"xaxis":"x","y":{"dtype":"f8","bdata":"\u002f\u002fD3PblWlUAuNuvtj6GVQEZ43rU2tJVACuCUV2y0lUAhP3jXg7SVQPASfdeDtJVAnoXW7V3SlUD6wml945aWQBZurNXrlpZAyix3jYOglkC2LgeSi6GWQH6hZbKFv5ZA7IORVam\u002flkACMkn4PSqXQI7S\u002fpgwcpdAaDD\u002fmDByl0AeYewDGbeXQK5beco7t5dApvus+kS3l0B2buv6RLeXQPALs5dFt5dAHpQ1QD\u002ful0AkuAVFP+6XQLQl4RKZyJhAsAo\u002fIJnImEBgnv1ksk2aQIY8z\u002fCX6JtAdOyAMZjom0BKLQWr\u002fSGcQJrWhqD6TZxAJhZxXhROnEASs9eBmE6cQILDigZFVZ1AJ2jsKxhuoEDkbyCIgnegQLHMRDTee6BAv7dGNX42oUCo3QlSgEWhQAivPdrON6NA8lR29c43o0CsM1BuWTijQLnkhf+4hKNArtYDIwWJo0CgPkUjBYmjQIU6WxmhqaNADinYVJGqo0B6suMBhrejQK2xfyIo0KNAJ3jSHAPRpEC+bWCeQdmkQIzL9yl9eKJAlH4EP1cio0CGBB42TzCjQNMd6dfjgqRAn+h626uEpECBP4dlrISkQH6Qg2ishKRAa43cgKyEpEBR9Ixg6YekQA8spG2B8aVAT7dnOYrzpUAPCN6oVD2mQEoIg6eoIadAPUroitWap0D+8B6i7JqnQIVyyCGCVKhAfmkLRhldqEABGAyBGV2oQA+X+aFGXahA5XDGqEerqEBHLsyoR6uoQIEv+clIq6hAToXKD0qrqEDOeuYWTKuoQFxtjQJ\u002fsKhAO7TtG0KyqEB82u0bQrKoQEs3hFifzahAcL2DiUbOqEBmo3I9l86oQJ+UulpAE6pAfHGIe0gXqkCN95wMll2qQGFIp1ssc6pADtNPnyxzqkD0vM+1MWyrQKp2jBkufaxAvYMLSi3ArUBsMJvbnACuQF83Sj6eAK5Aeqn4w54ArkD7sKjPRSCuQJYkvnqVJa5AvIuCZdQlrkBOPiDmwfquQDImFPL3W7BA9jx1DPa4sEBjpMWpB7+wQG4sz4ELv7BAXzSp7e3dsEAXfNPNDlqqQBWEfmcWWqpAgX6dQhVgqkD2qsJCrmCqQL7yw0KuYKpAcS5\u002fdG5mqkDGKgv9ApCqQD\u002fIkgUDkKpALonF+OrdrEBL31xA692sQAmFppmVDK1ApLjnhwsRrUDQiN6xCjKtQLIenn9\u002fAK9AEqAXp04wr0AzIQ8HoJGvQIYFN05Qk69Ad34dayOWr0D8a7jDE0ywQKgUJwCOhrBAefp3irC4sEB21gwytbiwQNBgnt\u002fFdbFATPRDE04JskB73EssUA2yQM\u002fKTixQDbJA9kHvvLEPskDkt6CjTxCyQMinB0BkEbJATOYaSncRskC3wYcJ1xGyQOhuGArXEbJAbkN+rIYqskCt\u002f8v2PpCyQDWBwhg\u002fkLJAMDIS3FeQskDz7zz9EvCyQFvZMoAzMLNAvb0tSZ8xs0DA9S1JnzGzQLe9vK7rSbNAYe3q6vJms0CkfXuV9GazQMaztQ37ZrNApqLwy5bes0Bi8P\u002fa4L20QE9jzgXsvbRAZS77Bey9tECll1S4Db60QHBAsnAwvrRA\u002fvibiXP0sECgbiZaXSqxQEtkePy+SbFAz\u002fML24I9skBBYEmUiz6yQIS86o\u002fxcbJA8QgpvDpyskBVBuQmg3KyQAjIHT\u002fGdLJAj7GAxljuskAZI+rmEjKzQDYVYhkOQrNAPBcjlg5Cs0CaIwiXDkKzQLlydcjAubNAbYRRoJm6s0Be5WxekruzQLrvN3W4u7NAcBIL4EHms0DS26uSr+izQLqfGdxj6bNAJpyselLrs0AY2hO7BeyzQAVmjq428bNA45vHp8U\u002ftEDCzQ\u002f7T9O0QOqXGiPg4bRAQ6d2DejhtEBN\u002fN0bVuK0QGX3n+WB6rRA8vgS24vttEAQ9C3KpQu1QBD0LcqlC7VA\u002fsfy6rsStUD+x\u002fLquxK1QJpRsSZRE7VAVrrkNFMTtUCC1cJTvhm1QD9JCn++GbVAkT6yr+AttUBI1bjU4TC1QH9gt9jiMLVAltjeCWeWtUAM\u002f\u002fQE\u002f5a1QFYg9RtvpLVANL35v4mktUBziizAiaS1QFtx7b6ZhbZALuvXC56FtkAeaE7enoW2QMpZuIaL8bRAUHGEWJZjtUDyRzjO1pa1QIpACkTXlrVAGURYcSKXtUCok1kIJJe1QJvpHWrDnLVANTZh3cqctUBUblrG25y1QH\u002fxlY4TnbVA2LAsdxydtUC6HidFdZ21QG+prEmHnbVA69+IYpuitUCdZYCZ6KW1QALexUIrqrVAEMAbDeCqtUDxMi5i6qq1QEUYF4XrqrVAFkmw9uyqtUDCBs9n7aq1QKA\u002fVlpk97VAD5\u002fkumf3tUCYpOS6Z\u002fe1QEp2JO7d97VAPUcl7t33tUBF2Xnu3fe1QBTozZID+LVAcNbWXjn4tUAi6aynXgG2QFioV+xiAbZA0N7bkCYCtkCAyCaulAO2QDoEmG6YA7ZA521Jnh0etkDWXK1hE1u2QEi7f0XeP7dA+9OC1I1tt0BisdEm0G23QPoDcXjSbbdAGuwUidJtt0CtlUYYBgu4QIrMHjAGC7hADfaUthq9uEBsYP1hDtK4QKueRbN+1LhASo\u002fgTJ7iuECgNg9Iz\u002fu4QDuWXgTPp7lA19qg5NanuUD41Vm1s7O4QN69Y7azs7hAvd0FrOzIuECvDTwz7Tu5QIqRb+REVrlA9S7kZktVukC7Q4EITlW6QCWdFsoavbpABRWL1xq9ukCLcAbP+c66QEo8\u002frsVKLtAwqn6liZPu0DG017+J0+7QMbTXv4nT7tApsODvChPu0D8fIm8KE+7QIONqRspT7tAP1OuQB9ju0DyKaIUbGO7QBexx2JtY7tAjEERY21ju0BqrMtciZ27QONvaCjQv7tAlgCdisPBu0D8\u002fI7ZGcS7QKq3mJPGc7xAhFoqvOg\u002fvUBhaBG+6D+9QDJbTcedQL1AI2MRQdxAvUAXX49VWkG9QLbnmcvDu71AKB0OU9jNvkB8ekO1IM6+QJp+TDQhzr5AU5BelHTOvkB95z2RJi6\u002fQKQx6tTbML9ApDHq1Nswv0DtJ6IxOjG\u002fQDLzd47Hub9A6S7F99S5v0Ck+X2GcRTAQMhoqep0FMBAuAi6cpNOwEAApvJyk07AQMA+WAiUTsBAZwc\u002fe05gwEAQqoKLTmDAQNDf2y1Xb8BAnG4n4rH8vEAQFs5ZxW29QKwVXx+trr1AHq1RLAT8vUD1n8pscqa+QHgjUW8aWb9Aq8VMmhpZv0Aoalxcko2\u002fQGqLl88plr9ALZSmWMoUwEAJgQfAVmjAQNpq6v3HaMBAsGrlmm\u002fVwEBEBZuw\u002fvLAQO0Fk4EJ88BA1eFr6ArzwEB0N5gKH\u002fPAQOD8ctcSS8FA8NQb9xJLwUD9ccXgDU3BQFh2QuQNTcFAdC0tBUROwUCQQ\u002fBBnk7BQKhnlJ4rVcFAi5HRiWtcwUBt8GCKa1zBQLGqfQHYYcFAsap9AdhhwUC3ZqZS2GHBQCUl7\u002fXgYcFAJkvp9+BhwUBmIAAW4WHBQBadOtd8esFA8tZ4PX16wUD9i4aDfXrBQP730tQ6psFAttAm1TqmwUAH\u002fYKjJr3BQFEPKNA7vcFAOwIl2nm9wUCziy4KkhrCQBJpzeHnOsJAr4DozhuMwkBOBhcdipXCQHOt4TiMlcJAUNXTF26WwkB8z7IL4pjCQC6WCvlopcJArV\u002f1mquqwkBd7mOGj\u002fXCQLV\u002fdTaPPsBAkslaYCxSwECqieQ0MFLAQE9exLeHZ8BAeNq6xmB1wECyG5bMYHXAQKapqcR1dcBAWzZDRWt5wEDH2uASzajAQO\u002fXURTNqMBAvM3RERvEwECSyVAuP8fAQMSjpC4\u002fx8BAMaUWVqbIwEDkfxSptMjAQL81xaoizcBAYhtupYHNwEDEgCLJgc3AQOXpRGGCzcBAGGZC7WvQwEC0f8R+e+jAQACnp3u668BAfjkWUrzrwECI\u002fa48Zu3AQHlbdlfF7cBAe\u002f0dWsXtwEDIt6rdASHBQEYPvVHsP8FAyrix31FBwUDq7cTfUUHBQJJUGpYBTcFARBcB4QBawUB2KS3hAFrBQHDLVLw3mMFA3eDh4lubwUBwn3O8e6bBQKV97PRcr8FAnLV9gV6vwUAiJghoCBDCQOoBHHn4FMJA2IyvR0ofwkCeCMsAiiLCQHiwB3usIsJAwP8G6Sg1wkA1\u002fo5kNjXCQPXmV8c9wcJALNqOyYzQwkDupzXQtdDCQPvaIOLW0MJAHdsg4tbQwkBN1Xh\u002feSnCQLhlyX95KcJAZ53Uzd5+wkDGxhas5H7CQL9qmHVvf8JAZBtvDj6BwkAUK9HIOYLCQDVYftLDiMJAIluh0Sy4wkDaKcbRLLjCQHiextEsuMJAHwdPyi64wkAUoXf\u002fNbnCQE9Gk0xducJARbLcCaS5wkCwcSJWULrCQL1HTddM9sJAYHbcpU5Cw0BKm3br60XDQMKhmQudSsNAjBemK51Kw0CxE8Sbq0rDQLQj2WTsSsNAtCPZZOxKw0B9yCIAX0vDQN4EW5kDX8NA4ex12qW2w0D+q58YKbfDQNBHUJnzvcNAVbITlPC+w0C+UtE8bdnDQNtK8CqWBMRAUEa3UJYExECHSpRzXjjEQCmxsHNeOMRA5hHpESpjxECSaRsSKmPEQDvoBMvHuMRADRardNvExEB7xRVtedLEQLHx\u002fGt60sRAzV9gq8wVxUCVZVExfh3FQJYckXW5HcVAZaIrB8cdxUDWgYZhbzHFQIJKu2NvMcVANTWazK1fxUCM80NT4ZPFQBJwrlPik8VAGdYFHq0ZxEA04\u002f2IsRnEQInTBmYXGsRAl5AwdNYdxEAzhN7a0h7EQHJ\u002fVnxuI8RAyLDaKFYqxECB2NkpVirEQBrqorVXKsRAQG\u002fJ7jl0xEDL+o+3P4HEQKeKRci1scRANotFyLWxxECsJ5+IKMTEQDYrn4goxMRANsVYajjExECcxMl5TPLEQEsyA8+f\u002f8RAyzUUCtIixUDAZBMhFijFQBdl0agOKcVAgEFGWg8pxUABY+aCDynFQOEpDoYPKcVAvKwc3RYpxUC9BB5AGSnFQHFi\u002fyYgQcVAIKmh5s2ixUCIbMtJzqLFQJxsy0nOosVA4boJsia0xUABjIhF9MLFQGT6kDXgy8VABI5NLPPuxUA1iCttvyjGQGDgAKsTKsZAK62LsdcqxkCaLLs2yC3GQPuW8\u002fSes8ZAsOwRDZ+zxkDlAjecbrTGQCK1SbRMtsZA0EinRk22xkDSHMlGTbbGQH1eQV1PtsZAK2JBXU+2xkAGGi8CWbbGQG8DqqNytsZAuy3NzHK2xkDPHSfdhLbGQIp2d8r2CMZAqQVEbvcIxkArszHyNCXGQJ2Yyxs1JcZABqYwHjUlxkDPUj3twCXGQB6mgmtYW8ZA4aPQkfpexkAQZqb302bGQPTNTRbUt8ZAlu2bxrfAxkBpDDmgtdLGQAsXftix1sZAKxEWJBPYxkDg1F1LyuXGQN\u002fkXUvK5cZAx7Xu+89Bx0CoECbeWZrHQDaLri98msdADhZlmeaax0Ahmr4iCAfIQE0dySBrDchAIQWEk8EayECSjtkLwhrIQOJnMTXCGshA0Q2Xa8IayEBeWatxwhrIQMik7UDKKMhA8NR6QecvyECLPbDM257IQNpOoGX5nshA+OV3rjKfyEBOOo8EUZ\u002fIQGy1\u002fkeSochAoVn\u002fR5KhyED\u002f2N0BW8TIQMjjvwVbxMhAd\u002fxX63HEyEC4LpWWdAjJQAyshjESlslAX03SQyafyUCJ1XHx4tPJQEKFQkPj1clAoxAa0iReykAEHG+sGnvKQKsLVtJjg8pAPmYh\u002fM6KykCEaq4Yt53KQBzDfFuMnspAul8IlTOkykAIKcL2u\u002fjHQDB46KQY\u002fMdAlq46YW\u002f8x0CZ7nS\u002fdvzHQPXzdL92\u002fMdAGyLvwXb8x0C5Llwc6fzHQMQuXBzp\u002fMdAQ9ghqLoVyEDM6ruO\u002fhXIQID10qwBFshAKfVHbwcWyEDTGsTEFBbIQKqgtmcVFshABm9B2K4yyEAfPsufrzLIQNEhQzZFNshAS4fuiTJEyEB48sUynETIQD58PDOcRMhAilO4rZxEyECJKDOpvkrIQAXQ8KnASshAkxaI7\u002fxKyEAg7CcyI0vIQH3gRaCBTchACvmW3IdNyEDEPCgRmk3IQNC+ihGaTchAq5ApEppNyECij5l4l1HIQKS15JWhjMhAzhdfT3vSyECBiRLuNDHJQBsrptxAQMlAMK7baztCyUBUNetrO0LJQKmubRzEQslA6lYz7SdEyUDYkjuSClDJQPRmA8sOUMlA2xIANxx5yUAdnG0jzpLJQGatyf8cl8lAJmTs\u002fxyXyUAzUoNdJpfJQEdT4DrHmclAEPAJMpqayUDGuaHqrJrJQKASqWzmmslAwDXJkQlHykAhE9c1DEfKQIvS3RsnR8pA+0cFQetQykCmr3jHjFPKQBZV9RmPU8pA+fNVQUpUykDN\u002fNImXlrKQKBJnAL4ZcpAsuR5bvhlykANiwu+ILbKQC5Y2P0+9cpAo8wQ0qv4ykD+iWDhVjjLQNGjpyA2eMtA8OswPTd4y0DSNRDQhnjLQFEBuU611stAvNfRT9rWy0DOLnhg7dbLQE89MDOD6MtAavTgZYPoy0ApCtHvg+jLQBgi1YFdCsxAqKFQkh5PzECBZCIzak\u002fMQE0dB02DVcxA7vxgeoNVzEBmmGkPKljMQCol7kVBXsxAy3HbyUlezEDJQd1qO2DMQOLmh77FrMxA5JuIvsWszEAEvkXYIq\u002fMQMOiUh8xr8xAIJvemm3DzEB+lXFYFtTMQLBiiXId4MxAdbQtLCTgzEBleExeG\u002f\u002fMQGV4TF4b\u002f8xAtOBPXhv\u002fzEDQfml9G\u002f\u002fMQL82H4v\u002fYs1AlX2L\u002fEfJzUCVeY3\u002fR8nNQK96jf9Hyc1ASBZptevTzUDL0tW4qwXOQFp2rLxQ2stAkLSGBNnay0A7G0tfHN\u002fLQP+QnJUd38tAgjEHy3jfy0AL2i02\u002fhHMQP6EmEiqEsxArIcR1pR0zEAahBnAcZzMQLgGuGCP8cxADSMq7pLxzEDV92sdq\u002fHMQPMRty2v8cxAZJerBWRrzUDDI80GZGvNQNOJyk5DcM1AkQPBaa27zUBZD3NqrbvNQFCe2H6tu81AbfmZhq27zUCO7p4crrvNQHh9rTS5u81A+LLZe8nXzUCWNCOmztfNQEoB6znP181AclXrOc\u002fXzUBqx2CEz9fNQM7udB5m3M1AnBASTmHpzUDbJhJOYenNQB0WQCtHE85ACBqlriIkzkA13MdGTSXOQHVRipn5N85AwVmKmfk3zkB9l7Wc+TfOQBmwZZ35N85Ar6HdoA+MzkAywBPeU9TOQN5b66671M5AWDMo0akZz0BYMyjRqRnPQBJ34SvwUs9AZhYDNvFSz0Bo3xRxIVXPQPzpFHEhVc9A2jCA7iVVz0Dy563zZGHPQFVavftcmM9Av+I8l0qZz0A="},"yaxis":"y","type":"scatter"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"},"margin":{"b":0,"l":0,"r":0,"t":30}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"X"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"y_real"}},"legend":{"tracegroupgap":0},"title":{"text":"Regress\u00e3o Linear \u2014 Dados Reais"}},                        {"responsive": true}                    ).then(function(){
+                            
+var gd = document.getElementById('6ee11557-6ee5-4578-a1e4-2a175418184a');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div>
+</div>
+</div>
+<p>Métricas do modelo</p>
+<div id="642d59bc" class="cell" data-execution_count="6">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> sklearn.metrics <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> r2_score, mean_squared_error</span>
+<span id="cb9-2"></span>
+<span id="cb9-3">r2 <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> r2_score(y, y_pred)</span>
+<span id="cb9-4">mse <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> mean_squared_error(y, y_pred)</span>
+<span id="cb9-5"></span>
+<span id="cb9-6"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"R²:"</span>, r2)</span>
+<span id="cb9-7"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"MSE:"</span>, mse)</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>R²: 0.9426947534388819
+MSE: 1008068.4828016725</code></pre>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>calcular</category>
+  <category>code</category>
+  <category>python</category>
+  <category>regreção</category>
+  <guid>https://your-website-url.example.com/posts/Regressão-linear/</guid>
+  <pubDate>Thu, 20 Nov 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://your-website-url.example.com/posts/Regressão-linear/regressão.png" medium="image" type="image/png" height="103" width="144"/>
+</item>
+<item>
+  <title>Monitoramento de Frota de Ônibus</title>
+  <dc:creator>Luiz Alberigi</dc:creator>
+  <link>https://your-website-url.example.com/posts/Monitoramento de Frota de Ônibus/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Este post desenvolve um mapa com os pontos de parada de uma linha de ônibus (marcados com pins) e também apresenta a posição real de onde está ônibus no momento. A linha de ônibus utilizada é 7049-10</p>
+<div id="23ad0333" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> requests</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> folium</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">from</span> IPython.display <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> display</span>
+<span id="cb1-4"></span>
+<span id="cb1-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ==============================</span></span>
+<span id="cb1-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># CONFIGURAÇÃO</span></span>
+<span id="cb1-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ==============================</span></span>
+<span id="cb1-8">TOKEN <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"c0b41dad848fe108b36f55a0649798f350251b9e448c364f8afca955041ad382"</span></span>
+<span id="cb1-9">CODIGO_LINHA <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1912</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># 7049-10</span></span>
+<span id="cb1-10"></span>
+<span id="cb1-11"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Paradas manuais (adicione as suas)</span></span>
+<span id="cb1-12">PARADAS <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb1-13">    (<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">23.62050</span>, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">46.76090</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Parada 1"</span>),</span>
+<span id="cb1-14">    (<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">23.62210</span>, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">46.75970</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Parada 2"</span>),</span>
+<span id="cb1-15">    (<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">23.62480</span>, <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">-</span><span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">46.75700</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Parada 3"</span>),</span>
+<span id="cb1-16">]</span>
+<span id="cb1-17"></span>
+<span id="cb1-18"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ==============================</span></span>
+<span id="cb1-19"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># AUTENTICAR</span></span>
+<span id="cb1-20"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ==============================</span></span>
+<span id="cb1-21">s <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> requests.Session()</span>
+<span id="cb1-22">auth <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> s.post(</span>
+<span id="cb1-23">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"http://api.olhovivo.sptrans.com.br/v2.1/Login/Autenticar"</span>,</span>
+<span id="cb1-24">    params<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>{<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"token"</span>: TOKEN}</span>
+<span id="cb1-25">)</span>
+<span id="cb1-26"></span>
+<span id="cb1-27"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> auth.text.strip().lower() <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">!=</span> <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"true"</span>:</span>
+<span id="cb1-28">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">raise</span> <span class="pp" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">Exception</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Falha ao autenticar. Resposta da API: "</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> auth.text)</span>
+<span id="cb1-29"></span>
+<span id="cb1-30"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ==============================</span></span>
+<span id="cb1-31"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># POSIÇÃO DOS ÔNIBUS EM TEMPO REAL (ENDPOINT CORRETO)</span></span>
+<span id="cb1-32"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ==============================</span></span>
+<span id="cb1-33">bus_resp <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> s.get(</span>
+<span id="cb1-34">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"http://api.olhovivo.sptrans.com.br/v2.1/Posicao/Linha"</span>,</span>
+<span id="cb1-35">    params<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>{<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"codigoLinha"</span>: CODIGO_LINHA}</span>
+<span id="cb1-36">)</span>
+<span id="cb1-37"></span>
+<span id="cb1-38">dados <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> bus_resp.json()</span>
+<span id="cb1-39"></span>
+<span id="cb1-40"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Lista de ônibus: lat, lon, prefixo</span></span>
+<span id="cb1-41">bus_positions <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> [</span>
+<span id="cb1-42">    (v[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"py"</span>], v[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"px"</span>], v[<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"p"</span>])</span>
+<span id="cb1-43">    <span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> v <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> dados.get(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"vs"</span>, [])</span>
+<span id="cb1-44">]</span>
+<span id="cb1-45"></span>
+<span id="cb1-46"><span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">print</span>(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Ônibus encontrados:"</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(bus_positions))</span>
+<span id="cb1-47"></span>
+<span id="cb1-48"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ==============================</span></span>
+<span id="cb1-49"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># GERAR MAPA</span></span>
+<span id="cb1-50"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ==============================</span></span>
+<span id="cb1-51"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Centralizar no primeiro ônibus ou numa parada</span></span>
+<span id="cb1-52"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">if</span> bus_positions:</span>
+<span id="cb1-53">    center <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> (bus_positions[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>][<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>], bus_positions[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>][<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">1</span>])</span>
+<span id="cb1-54"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">else</span>:</span>
+<span id="cb1-55">    center <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> PARADAS[<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>][:<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">2</span>]</span>
+<span id="cb1-56"></span>
+<span id="cb1-57">m <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> folium.Map(location<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>center, zoom_start<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">15</span>)</span>
+<span id="cb1-58"></span>
+<span id="cb1-59"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ---- PARADAS (AZUL)</span></span>
+<span id="cb1-60"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> lat, lon, nome <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> PARADAS:</span>
+<span id="cb1-61">    folium.Marker(</span>
+<span id="cb1-62">        location<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(lat, lon),</span>
+<span id="cb1-63">        popup<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Parada: </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>nome<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>,</span>
+<span id="cb1-64">        icon<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>folium.Icon(color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"blue"</span>, icon<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"info-sign"</span>)</span>
+<span id="cb1-65">    ).add_to(m)</span>
+<span id="cb1-66"></span>
+<span id="cb1-67"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># ---- ÔNIBUS (VERMELHO)</span></span>
+<span id="cb1-68"><span class="cf" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">for</span> lat, lon, prefixo <span class="kw" style="color: #003B4F;
+background-color: null;
+font-weight: bold;
+font-style: inherit;">in</span> bus_positions:</span>
+<span id="cb1-69">    folium.Marker(</span>
+<span id="cb1-70">        location<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>(lat, lon),</span>
+<span id="cb1-71">        popup<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">f"Ônibus </span><span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">{</span>prefixo<span class="sc" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">}</span><span class="ss" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"</span>,</span>
+<span id="cb1-72">        icon<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span>folium.Icon(color<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"red"</span>, icon<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"bus"</span>)</span>
+<span id="cb1-73">    ).add_to(m)</span>
+<span id="cb1-74"></span>
+<span id="cb1-75"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Exibir no Quarto</span></span>
+<span id="cb1-76">m</span></code></pre></div></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Ônibus encontrados: 5</code></pre>
+</div>
+<div class="cell-output cell-output-display" data-execution_count="1">
+<div style="width:100%;"><div style="position:relative;width:100%;height:0;padding-bottom:60%;"><span style="color:#565656">Make this Notebook Trusted to load map: File -&gt; Trust Notebook</span><iframe srcdoc="<!DOCTYPE html>
+<html>
+<head>
+    
+    <meta http-equiv=&quot;content-type&quot; content=&quot;text/html; charset=UTF-8&quot; />
+    <script src=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.js&quot;></script>
+    <script src=&quot;https://code.jquery.com/jquery-3.7.1.min.js&quot;></script>
+    <script src=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js&quot;></script>
+    <script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.js&quot;></script>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/leaflet@1.9.3/dist/leaflet.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-glyphicons.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.0/css/all.min.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdnjs.cloudflare.com/ajax/libs/Leaflet.awesome-markers/2.0.2/leaflet.awesome-markers.css&quot;/>
+    <link rel=&quot;stylesheet&quot; href=&quot;https://cdn.jsdelivr.net/gh/python-visualization/folium/folium/templates/leaflet.awesome.rotate.min.css&quot;/>
+    
+            <meta name=&quot;viewport&quot; content=&quot;width=device-width,
+                initial-scale=1.0, maximum-scale=1.0, user-scalable=no&quot; />
+            <style>
+                #map_6b150da90c1c606dceda41634b993a92 {
+                    position: relative;
+                    width: 100.0%;
+                    height: 100.0%;
+                    left: 0.0%;
+                    top: 0.0%;
+                }
+                .leaflet-container { font-size: 1rem; }
+            </style>
+
+            <style>html, body {
+                width: 100%;
+                height: 100%;
+                margin: 0;
+                padding: 0;
+            }
+            </style>
+
+            <style>#map {
+                position:absolute;
+                top:0;
+                bottom:0;
+                right:0;
+                left:0;
+                }
+            </style>
+
+            <script>
+                L_NO_TOUCH = false;
+                L_DISABLE_3D = false;
+            </script>
+
+        
+</head>
+<body>
+    
+    
+            <div class=&quot;folium-map&quot; id=&quot;map_6b150da90c1c606dceda41634b993a92&quot; ></div>
+        
+</body>
+<script>
+    
+    
+            var map_6b150da90c1c606dceda41634b993a92 = L.map(
+                &quot;map_6b150da90c1c606dceda41634b993a92&quot;,
+                {
+                    center: [-23.7116535, -46.777972],
+                    crs: L.CRS.EPSG3857,
+                    ...{
+  &quot;zoom&quot;: 15,
+  &quot;zoomControl&quot;: true,
+  &quot;preferCanvas&quot;: false,
+}
+
+                }
+            );
+
+            
+
+        
+    
+            var tile_layer_3da7be93718dd6926511639fe70f5555 = L.tileLayer(
+                &quot;https://tile.openstreetmap.org/{z}/{x}/{y}.png&quot;,
+                {
+  &quot;minZoom&quot;: 0,
+  &quot;maxZoom&quot;: 19,
+  &quot;maxNativeZoom&quot;: 19,
+  &quot;noWrap&quot;: false,
+  &quot;attribution&quot;: &quot;\u0026copy; \u003ca href=\&quot;https://www.openstreetmap.org/copyright\&quot;\u003eOpenStreetMap\u003c/a\u003e contributors&quot;,
+  &quot;subdomains&quot;: &quot;abc&quot;,
+  &quot;detectRetina&quot;: false,
+  &quot;tms&quot;: false,
+  &quot;opacity&quot;: 1,
+}
+
+            );
+        
+    
+            tile_layer_3da7be93718dd6926511639fe70f5555.addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var marker_a5719439f3d0578d48d1b198fcc5f9f1 = L.marker(
+                [-23.6205, -46.7609],
+                {
+}
+            ).addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var icon_50828cb4e5144f9a72904269e8efc889 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_577f6ea6521bc2fafd0f28b75441443d = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_6e9bd157055a92fd798ec442e5d0dd30 = $(`<div id=&quot;html_6e9bd157055a92fd798ec442e5d0dd30&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>Parada: Parada 1</div>`)[0];
+                popup_577f6ea6521bc2fafd0f28b75441443d.setContent(html_6e9bd157055a92fd798ec442e5d0dd30);
+            
+        
+
+        marker_a5719439f3d0578d48d1b198fcc5f9f1.bindPopup(popup_577f6ea6521bc2fafd0f28b75441443d)
+        ;
+
+        
+    
+    
+                marker_a5719439f3d0578d48d1b198fcc5f9f1.setIcon(icon_50828cb4e5144f9a72904269e8efc889);
+            
+    
+            var marker_a4d864df45455705b95ca2ae982ab400 = L.marker(
+                [-23.6221, -46.7597],
+                {
+}
+            ).addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var icon_9c603c5a3c385a63c88bf756c440b987 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_4973ff4dfb00aedd0a106ccaf8fbf1c3 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_99f2a5bac1f4edf9a0eeb44c6d839404 = $(`<div id=&quot;html_99f2a5bac1f4edf9a0eeb44c6d839404&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>Parada: Parada 2</div>`)[0];
+                popup_4973ff4dfb00aedd0a106ccaf8fbf1c3.setContent(html_99f2a5bac1f4edf9a0eeb44c6d839404);
+            
+        
+
+        marker_a4d864df45455705b95ca2ae982ab400.bindPopup(popup_4973ff4dfb00aedd0a106ccaf8fbf1c3)
+        ;
+
+        
+    
+    
+                marker_a4d864df45455705b95ca2ae982ab400.setIcon(icon_9c603c5a3c385a63c88bf756c440b987);
+            
+    
+            var marker_0d57e1a8f3a7ab7f5bc34053a86dc905 = L.marker(
+                [-23.6248, -46.757],
+                {
+}
+            ).addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var icon_bec3f4bae6021a647e31b0d576527a03 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;blue&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;info-sign&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_4f17e88e94ee993940723d54e6b8b1bd = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_97223d70bd121a60a55b31b079621242 = $(`<div id=&quot;html_97223d70bd121a60a55b31b079621242&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>Parada: Parada 3</div>`)[0];
+                popup_4f17e88e94ee993940723d54e6b8b1bd.setContent(html_97223d70bd121a60a55b31b079621242);
+            
+        
+
+        marker_0d57e1a8f3a7ab7f5bc34053a86dc905.bindPopup(popup_4f17e88e94ee993940723d54e6b8b1bd)
+        ;
+
+        
+    
+    
+                marker_0d57e1a8f3a7ab7f5bc34053a86dc905.setIcon(icon_bec3f4bae6021a647e31b0d576527a03);
+            
+    
+            var marker_b72ceb5c25ddd35b4a64189652f63694 = L.marker(
+                [-23.7116535, -46.777972],
+                {
+}
+            ).addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var icon_4fc749ea261daca56a86b568e4336695 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;red&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;bus&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_84788e8c44c216413c1e6945d03a1701 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_5fa0102e702a09fb26855a3d288f6c53 = $(`<div id=&quot;html_5fa0102e702a09fb26855a3d288f6c53&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>Ônibus 78371</div>`)[0];
+                popup_84788e8c44c216413c1e6945d03a1701.setContent(html_5fa0102e702a09fb26855a3d288f6c53);
+            
+        
+
+        marker_b72ceb5c25ddd35b4a64189652f63694.bindPopup(popup_84788e8c44c216413c1e6945d03a1701)
+        ;
+
+        
+    
+    
+                marker_b72ceb5c25ddd35b4a64189652f63694.setIcon(icon_4fc749ea261daca56a86b568e4336695);
+            
+    
+            var marker_05c1c906c822ed0293d562fc6824f155 = L.marker(
+                [-23.661455500000002, -46.778644],
+                {
+}
+            ).addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var icon_369b247f7c6104777e19aba95a2abf74 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;red&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;bus&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_3bb489a66b595f3b71582874aaa4c4f0 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_a96bc8f7e8273884eac98f662ae1e490 = $(`<div id=&quot;html_a96bc8f7e8273884eac98f662ae1e490&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>Ônibus 78200</div>`)[0];
+                popup_3bb489a66b595f3b71582874aaa4c4f0.setContent(html_a96bc8f7e8273884eac98f662ae1e490);
+            
+        
+
+        marker_05c1c906c822ed0293d562fc6824f155.bindPopup(popup_3bb489a66b595f3b71582874aaa4c4f0)
+        ;
+
+        
+    
+    
+                marker_05c1c906c822ed0293d562fc6824f155.setIcon(icon_369b247f7c6104777e19aba95a2abf74);
+            
+    
+            var marker_4115293e8857fd1d764e14ea41022c34 = L.marker(
+                [-23.7116535, -46.777972],
+                {
+}
+            ).addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var icon_197c96db2ef6e9e5e7c2e92cd24b474f = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;red&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;bus&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_5dfabddc47f247f42f3f4e1acc5497bf = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_47af19071a7cb5bdeea6e993c71fc0ce = $(`<div id=&quot;html_47af19071a7cb5bdeea6e993c71fc0ce&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>Ônibus 78918</div>`)[0];
+                popup_5dfabddc47f247f42f3f4e1acc5497bf.setContent(html_47af19071a7cb5bdeea6e993c71fc0ce);
+            
+        
+
+        marker_4115293e8857fd1d764e14ea41022c34.bindPopup(popup_5dfabddc47f247f42f3f4e1acc5497bf)
+        ;
+
+        
+    
+    
+                marker_4115293e8857fd1d764e14ea41022c34.setIcon(icon_197c96db2ef6e9e5e7c2e92cd24b474f);
+            
+    
+            var marker_016d291b62a23cda8c8028d5cbef80cf = L.marker(
+                [-23.7116535, -46.777972],
+                {
+}
+            ).addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var icon_9e98d781b65a0766ad41b45eebb78709 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;red&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;bus&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_92d24c1d5cbc03d7e91fece70f029fdf = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_81fa0cb20e71e884f897ee8e788a7883 = $(`<div id=&quot;html_81fa0cb20e71e884f897ee8e788a7883&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>Ônibus 78182</div>`)[0];
+                popup_92d24c1d5cbc03d7e91fece70f029fdf.setContent(html_81fa0cb20e71e884f897ee8e788a7883);
+            
+        
+
+        marker_016d291b62a23cda8c8028d5cbef80cf.bindPopup(popup_92d24c1d5cbc03d7e91fece70f029fdf)
+        ;
+
+        
+    
+    
+                marker_016d291b62a23cda8c8028d5cbef80cf.setIcon(icon_9e98d781b65a0766ad41b45eebb78709);
+            
+    
+            var marker_3e235f30f24e8a0c347b63aa16baeb17 = L.marker(
+                [-23.694872, -46.7797925],
+                {
+}
+            ).addTo(map_6b150da90c1c606dceda41634b993a92);
+        
+    
+            var icon_eab992a3fe02dcc9994ab73522bbb7b0 = L.AwesomeMarkers.icon(
+                {
+  &quot;markerColor&quot;: &quot;red&quot;,
+  &quot;iconColor&quot;: &quot;white&quot;,
+  &quot;icon&quot;: &quot;bus&quot;,
+  &quot;prefix&quot;: &quot;glyphicon&quot;,
+  &quot;extraClasses&quot;: &quot;fa-rotate-0&quot;,
+}
+            );
+        
+    
+        var popup_87ce13ffbd35544aa4b2f5b5dab2dd30 = L.popup({
+  &quot;maxWidth&quot;: &quot;100%&quot;,
+});
+
+        
+            
+                var html_11291c64fccc76e9e84a35ec1a4b2daf = $(`<div id=&quot;html_11291c64fccc76e9e84a35ec1a4b2daf&quot; style=&quot;width: 100.0%; height: 100.0%;&quot;>Ônibus 78733</div>`)[0];
+                popup_87ce13ffbd35544aa4b2f5b5dab2dd30.setContent(html_11291c64fccc76e9e84a35ec1a4b2daf);
+            
+        
+
+        marker_3e235f30f24e8a0c347b63aa16baeb17.bindPopup(popup_87ce13ffbd35544aa4b2f5b5dab2dd30)
+        ;
+
+        
+    
+    
+                marker_3e235f30f24e8a0c347b63aa16baeb17.setIcon(icon_eab992a3fe02dcc9994ab73522bbb7b0);
+            
+</script>
+</html>" style="position:absolute;width:100%;height:100%;left:0;top:0;border:none !important;" allowfullscreen="" webkitallowfullscreen="" mozallowfullscreen=""></iframe></div></div>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>monitoramento</category>
+  <category>code</category>
+  <category>python</category>
+  <category>onibus</category>
+  <guid>https://your-website-url.example.com/posts/Monitoramento de Frota de Ônibus/</guid>
+  <pubDate>Wed, 19 Nov 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://your-website-url.example.com/posts/Monitoramento de Frota de Ônibus/Entrega-Blog_Entrega_blog_2.png" medium="image" type="image/png" height="144" width="144"/>
+</item>
+<item>
+  <title>Gráfico da Cotação do Dólar por Período</title>
+  <dc:creator>Luiz Alberigi</dc:creator>
+  <link>https://your-website-url.example.com/posts/Cotação do Dólar/</link>
+  <description><![CDATA[ 
+
+
+
+
+
+<p>Este post tem como objetivo desenvolver uma rotina em <em>Python</em> que, a partir de uma string no formato “MMYYYY”, consulte a API PTAX do Banco Central do Brasil e retorne um gráfico de linha mostrando a <strong>cotação do dólar</strong> ao longo do mês informado.</p>
+<div id="83d29f0b" class="cell" data-execution_count="1">
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1" style="background: #f1f3f5;"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> pandas <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> pd</span>
+<span id="cb1-2"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> plotly.express <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> px</span>
+<span id="cb1-3"><span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">import</span> numpy <span class="im" style="color: #00769E;
+background-color: null;
+font-style: inherit;">as</span> np</span>
+<span id="cb1-4"></span>
+<span id="cb1-5"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># -----------------------</span></span>
+<span id="cb1-6"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Dados simulados para Junho/2023</span></span>
+<span id="cb1-7"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># -----------------------</span></span>
+<span id="cb1-8">datas <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.date_range(<span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2023-06-01"</span>, <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"2023-06-30"</span>, freq<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"D"</span>)</span>
+<span id="cb1-9">cotacoes <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">4.90</span> <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">+</span> np.sin(np.linspace(<span class="dv" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0</span>, <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">3.14</span>, <span class="bu" style="color: null;
+background-color: null;
+font-style: inherit;">len</span>(datas))) <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">*</span> <span class="fl" style="color: #AD0000;
+background-color: null;
+font-style: inherit;">0.20</span>  <span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># pequena variação artificial</span></span>
+<span id="cb1-10"></span>
+<span id="cb1-11">df <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> pd.DataFrame({</span>
+<span id="cb1-12">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dataHoraCotacao"</span>: datas,</span>
+<span id="cb1-13">    <span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cotacaoVenda"</span>: cotacoes</span>
+<span id="cb1-14">})</span>
+<span id="cb1-15"></span>
+<span id="cb1-16"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># -----------------------</span></span>
+<span id="cb1-17"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># Gráfico</span></span>
+<span id="cb1-18"><span class="co" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;"># -----------------------</span></span>
+<span id="cb1-19">fig <span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span> px.line(</span>
+<span id="cb1-20">    df,</span>
+<span id="cb1-21">    x<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"dataHoraCotacao"</span>,</span>
+<span id="cb1-22">    y<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"cotacaoVenda"</span>,</span>
+<span id="cb1-23">    title<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Cotação do Dólar – Junho/2023 (Simulado)"</span>,</span>
+<span id="cb1-24">    markers<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="va" style="color: #111111;
+background-color: null;
+font-style: inherit;">True</span></span>
+<span id="cb1-25">)</span>
+<span id="cb1-26"></span>
+<span id="cb1-27">fig.update_layout(</span>
+<span id="cb1-28">    xaxis_title<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Data"</span>,</span>
+<span id="cb1-29">    yaxis_title<span class="op" style="color: #5E5E5E;
+background-color: null;
+font-style: inherit;">=</span><span class="st" style="color: #20794D;
+background-color: null;
+font-style: inherit;">"Cotação de Venda (R$)"</span></span>
+<span id="cb1-30">)</span>
+<span id="cb1-31"></span>
+<span id="cb1-32">fig.show()</span></code></pre></div></div>
+<div class="cell-output cell-output-display">
+<div>            <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-AMS-MML_SVG"></script><script type="text/javascript">if (window.MathJax && window.MathJax.Hub && window.MathJax.Hub.Config) {window.MathJax.Hub.Config({SVG: {font: "STIX-Web"}});}</script>                <script type="text/javascript">window.PlotlyConfig = {MathJaxConfig: 'local'};</script>
+        <script charset="utf-8" src="https://cdn.plot.ly/plotly-3.2.0.min.js" integrity="sha256-iZ2u/oU2wf/vDbl/ChcX93WgbBRSBvUO6N413hDz7xM=" crossorigin="anonymous"></script>                <div id="9721121b-14e0-4246-ab74-85a5a86bd0a0" class="plotly-graph-div" style="height:525px; width:100%;"></div>            <script type="text/javascript">                window.PLOTLYENV=window.PLOTLYENV || {};                                if (document.getElementById("9721121b-14e0-4246-ab74-85a5a86bd0a0")) {                    Plotly.newPlot(                        "9721121b-14e0-4246-ab74-85a5a86bd0a0",                        [{"hovertemplate":"dataHoraCotacao=%{x}\u003cbr\u003ecotacaoVenda=%{y}\u003cextra\u003e\u003c\u002fextra\u003e","legendgroup":"","line":{"color":"#636efa","dash":"solid"},"marker":{"symbol":"circle"},"mode":"lines+markers","name":"","orientation":"v","showlegend":false,"x":["2023-06-01T00:00:00.000000000","2023-06-02T00:00:00.000000000","2023-06-03T00:00:00.000000000","2023-06-04T00:00:00.000000000","2023-06-05T00:00:00.000000000","2023-06-06T00:00:00.000000000","2023-06-07T00:00:00.000000000","2023-06-08T00:00:00.000000000","2023-06-09T00:00:00.000000000","2023-06-10T00:00:00.000000000","2023-06-11T00:00:00.000000000","2023-06-12T00:00:00.000000000","2023-06-13T00:00:00.000000000","2023-06-14T00:00:00.000000000","2023-06-15T00:00:00.000000000","2023-06-16T00:00:00.000000000","2023-06-17T00:00:00.000000000","2023-06-18T00:00:00.000000000","2023-06-19T00:00:00.000000000","2023-06-20T00:00:00.000000000","2023-06-21T00:00:00.000000000","2023-06-22T00:00:00.000000000","2023-06-23T00:00:00.000000000","2023-06-24T00:00:00.000000000","2023-06-25T00:00:00.000000000","2023-06-26T00:00:00.000000000","2023-06-27T00:00:00.000000000","2023-06-28T00:00:00.000000000","2023-06-29T00:00:00.000000000","2023-06-30T00:00:00.000000000"],"xaxis":"x","y":{"dtype":"f8","bdata":"mpmZmZmZE0DGOLVJu68TQEC3O56axRNAMEaOAvbaE0C+LKZtje8TQGZtFCIjAxRA358fZ3wVFEBC9dQ4YiYUQNx+\u002fOyhNRRAgCECyw1DFECXuwuVfU4UQCd2oQDPVxRApHt+HeZeFEBhzlWprWMUQA4UkE8XZhRAHzhD1BtmFECyEOMpu2MUQDj9aXH8XhRAMgX55O1XFEBgjS+tpE4UQBaKuqE8QxRA32XZ9dc1FEAH6tLRniYUQFaejdq+FRRAUqO0qGoDFEDPXQMx2e8TQNvPfh9F2xNAUKyKJ+zFE0CMmulKDrATQCda0xntmRNA"},"yaxis":"y","type":"scatter"}],                        {"template":{"data":{"histogram2dcontour":[{"type":"histogram2dcontour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"choropleth":[{"type":"choropleth","colorbar":{"outlinewidth":0,"ticks":""}}],"histogram2d":[{"type":"histogram2d","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"heatmap":[{"type":"heatmap","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"contourcarpet":[{"type":"contourcarpet","colorbar":{"outlinewidth":0,"ticks":""}}],"contour":[{"type":"contour","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"surface":[{"type":"surface","colorbar":{"outlinewidth":0,"ticks":""},"colorscale":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]]}],"mesh3d":[{"type":"mesh3d","colorbar":{"outlinewidth":0,"ticks":""}}],"scatter":[{"fillpattern":{"fillmode":"overlay","size":10,"solidity":0.2},"type":"scatter"}],"parcoords":[{"type":"parcoords","line":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolargl":[{"type":"scatterpolargl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"bar":[{"error_x":{"color":"#2a3f5f"},"error_y":{"color":"#2a3f5f"},"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"bar"}],"scattergeo":[{"type":"scattergeo","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterpolar":[{"type":"scatterpolar","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"histogram":[{"marker":{"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"histogram"}],"scattergl":[{"type":"scattergl","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatter3d":[{"type":"scatter3d","line":{"colorbar":{"outlinewidth":0,"ticks":""}},"marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermap":[{"type":"scattermap","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattermapbox":[{"type":"scattermapbox","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scatterternary":[{"type":"scatterternary","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"scattercarpet":[{"type":"scattercarpet","marker":{"colorbar":{"outlinewidth":0,"ticks":""}}}],"carpet":[{"aaxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"baxis":{"endlinecolor":"#2a3f5f","gridcolor":"white","linecolor":"white","minorgridcolor":"white","startlinecolor":"#2a3f5f"},"type":"carpet"}],"table":[{"cells":{"fill":{"color":"#EBF0F8"},"line":{"color":"white"}},"header":{"fill":{"color":"#C8D4E3"},"line":{"color":"white"}},"type":"table"}],"barpolar":[{"marker":{"line":{"color":"#E5ECF6","width":0.5},"pattern":{"fillmode":"overlay","size":10,"solidity":0.2}},"type":"barpolar"}],"pie":[{"automargin":true,"type":"pie"}]},"layout":{"autotypenumbers":"strict","colorway":["#636efa","#EF553B","#00cc96","#ab63fa","#FFA15A","#19d3f3","#FF6692","#B6E880","#FF97FF","#FECB52"],"font":{"color":"#2a3f5f"},"hovermode":"closest","hoverlabel":{"align":"left"},"paper_bgcolor":"white","plot_bgcolor":"#E5ECF6","polar":{"bgcolor":"#E5ECF6","angularaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"radialaxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"ternary":{"bgcolor":"#E5ECF6","aaxis":{"gridcolor":"white","linecolor":"white","ticks":""},"baxis":{"gridcolor":"white","linecolor":"white","ticks":""},"caxis":{"gridcolor":"white","linecolor":"white","ticks":""}},"coloraxis":{"colorbar":{"outlinewidth":0,"ticks":""}},"colorscale":{"sequential":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"sequentialminus":[[0.0,"#0d0887"],[0.1111111111111111,"#46039f"],[0.2222222222222222,"#7201a8"],[0.3333333333333333,"#9c179e"],[0.4444444444444444,"#bd3786"],[0.5555555555555556,"#d8576b"],[0.6666666666666666,"#ed7953"],[0.7777777777777778,"#fb9f3a"],[0.8888888888888888,"#fdca26"],[1.0,"#f0f921"]],"diverging":[[0,"#8e0152"],[0.1,"#c51b7d"],[0.2,"#de77ae"],[0.3,"#f1b6da"],[0.4,"#fde0ef"],[0.5,"#f7f7f7"],[0.6,"#e6f5d0"],[0.7,"#b8e186"],[0.8,"#7fbc41"],[0.9,"#4d9221"],[1,"#276419"]]},"xaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"yaxis":{"gridcolor":"white","linecolor":"white","ticks":"","title":{"standoff":15},"zerolinecolor":"white","automargin":true,"zerolinewidth":2},"scene":{"xaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"yaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2},"zaxis":{"backgroundcolor":"#E5ECF6","gridcolor":"white","linecolor":"white","showbackground":true,"ticks":"","zerolinecolor":"white","gridwidth":2}},"shapedefaults":{"line":{"color":"#2a3f5f"}},"annotationdefaults":{"arrowcolor":"#2a3f5f","arrowhead":0,"arrowwidth":1},"geo":{"bgcolor":"white","landcolor":"#E5ECF6","subunitcolor":"white","showland":true,"showlakes":true,"lakecolor":"white"},"title":{"x":0.05},"mapbox":{"style":"light"},"margin":{"b":0,"l":0,"r":0,"t":30}}},"xaxis":{"anchor":"y","domain":[0.0,1.0],"title":{"text":"Data"}},"yaxis":{"anchor":"x","domain":[0.0,1.0],"title":{"text":"Cota\u00e7\u00e3o de Venda (R$)"}},"legend":{"tracegroupgap":0},"title":{"text":"Cota\u00e7\u00e3o do D\u00f3lar \u2013 Junho\u002f2023 (Simulado)"}},                        {"responsive": true}                    ).then(function(){
+                            
+var gd = document.getElementById('9721121b-14e0-4246-ab74-85a5a86bd0a0');
+var x = new MutationObserver(function (mutations, observer) {{
+        var display = window.getComputedStyle(gd).display;
+        if (!display || display === 'none') {{
+            console.log([gd, 'removed!']);
+            Plotly.purge(gd);
+            observer.disconnect();
+        }}
+}});
+
+// Listen for the removal of the full notebook cells
+var notebookContainer = gd.closest('#notebook-container');
+if (notebookContainer) {{
+    x.observe(notebookContainer, {childList: true});
+}}
+
+// Listen for the clearing of the current output cell
+var outputEl = gd.closest('.output');
+if (outputEl) {{
+    x.observe(outputEl, {childList: true});
+}}
+
+                        })                };            </script>        </div>
+</div>
+</div>
+
+
+
+ ]]></description>
+  <category>cotação</category>
+  <category>code</category>
+  <category>python</category>
+  <category>dólar</category>
+  <guid>https://your-website-url.example.com/posts/Cotação do Dólar/</guid>
+  <pubDate>Tue, 18 Nov 2025 00:00:00 GMT</pubDate>
+  <media:content url="https://your-website-url.example.com/posts/Cotação do Dólar/pngtree-financial-growth-a-rising-graph-stacks-of-money-and-coins-illustrate-png-image_15331270.png" medium="image" type="image/png" height="144" width="144"/>
+</item>
+</channel>
+</rss>

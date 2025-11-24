@@ -1,0 +1,6 @@
+--2025-11-23 21:59:44--  https://gncnews.com.br/img/crop?img=dc654d4cedc09036f61d4956e986cef8.png
+Resolving gncnews.com.br (gncnews.com.br)... 172.67.180.182, 104.21.18.65, 2606:4700:3032::6815:1241, ...
+Connecting to gncnews.com.br (gncnews.com.br)|172.67.180.182|:443... connected.
+HTTP request sent, awaiting response... 403 Forbidden
+2025-11-23 21:59:45 ERROR 403: Forbidden.
+
